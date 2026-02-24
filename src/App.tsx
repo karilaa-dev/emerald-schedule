@@ -3,7 +3,7 @@ import type { ScheduleEvent } from "./types.ts";
 import { useSchedule } from "./hooks/useSchedule.ts";
 import { useFavorites } from "./hooks/useFavorites.ts";
 import { useFilters } from "./hooks/useFilters.ts";
-import { getUniqueDays, formatDayShort, formatDayDate } from "./lib/dates.ts";
+import { getUniqueDays, getDayKey, formatDayShort, formatDayDate } from "./lib/dates.ts";
 import {
   filterEvents,
   getUniqueCategories,
@@ -30,7 +30,7 @@ export function App() {
   const isOnline = useOnlineStatus();
   const { visible: showInstallTip, install, dismiss: dismissInstallTip } = useInstallPrompt();
   const { theme, toggle: toggleTheme } = useTheme();
-  const { favorites, toggle: toggleFavorite, count: favoriteCount } = useFavorites();
+  const { favorites, toggle: toggleFavorite } = useFavorites();
   const {
     filters,
     setDay,
@@ -74,6 +74,11 @@ export function App() {
     () => filterEvents(events, filters, favorites),
     [events, filters, favorites],
   );
+
+  const dayFavoriteCount = useMemo(() => {
+    if (!filters.day) return favorites.size;
+    return events.filter((e) => favorites.has(e.id) && getDayKey(e.start_time) === filters.day).length;
+  }, [events, favorites, filters.day]);
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -152,6 +157,9 @@ export function App() {
             onClear={clearFilters}
             hasActiveFilters={hasActiveFilters}
             searchBar={<SearchBar value={filters.search} onChange={setSearch} />}
+            favoritesCount={dayFavoriteCount}
+            favoritesOnly={filters.favoritesOnly}
+            onToggleFavorites={toggleFavoritesOnly}
           />
         </div>
 
@@ -203,7 +211,7 @@ export function App() {
       <ScheduleFooter lastChecked={lastChecked} lastUpdated={lastUpdated} onCheck={checkNow} onForceUpdate={forceUpdate} />
 
       <FavoritesBar
-        count={favoriteCount}
+        count={dayFavoriteCount}
         favoritesOnly={filters.favoritesOnly}
         onToggle={toggleFavoritesOnly}
       />

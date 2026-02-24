@@ -13,6 +13,25 @@ interface Props {
   onClear: () => void;
   hasActiveFilters: boolean;
   searchBar?: ReactNode;
+  favoritesCount: number;
+  favoritesOnly: boolean;
+  onToggleFavorites: () => void;
+}
+
+const CHIP_BASE = "rounded-full px-2.5 py-1 text-xs font-500 transition-all duration-150";
+const CHIP_ACTIVE = `${CHIP_BASE} bg-accent-light text-accent font-600 shadow-sm`;
+const CHIP_INACTIVE = `${CHIP_BASE} bg-surface-warm text-ink-muted hover:bg-border-light hover:text-ink`;
+
+function chipClass(isActive: boolean): string {
+  return isActive ? CHIP_ACTIVE : CHIP_INACTIVE;
+}
+
+function SectionHeading({ children }: { children: string }) {
+  return (
+    <h4 className="font-display text-[10px] font-700 text-ink-faint uppercase tracking-[0.15em] mb-2">
+      {children}
+    </h4>
+  );
 }
 
 function FilterSection({
@@ -32,18 +51,12 @@ function FilterSection({
 
   return (
     <div>
-      <h4 className="font-display text-[10px] font-700 text-ink-faint uppercase tracking-[0.15em] mb-2">
-        {title}
-      </h4>
+      <SectionHeading>{title}</SectionHeading>
       <div className="flex flex-wrap gap-1.5">
         {shown.map((item) => (
           <button
             key={item}
-            className={`rounded-full px-2.5 py-1 text-xs font-500 transition-all duration-150 ${
-              active.has(item)
-                ? "bg-accent-light text-accent font-600 shadow-sm"
-                : "bg-surface-warm text-ink-muted hover:bg-border-light hover:text-ink"
-            }`}
+            className={chipClass(active.has(item))}
             onClick={() => onToggle(item)}
           >
             {item}
@@ -75,6 +88,9 @@ export function FilterPanel({
   onClear,
   hasActiveFilters,
   searchBar,
+  favoritesCount,
+  favoritesOnly,
+  onToggleFavorites,
 }: Props) {
   const [open, setOpen] = useState(false);
   const count = activeCategories.size + activeTags.size + activeLocations.size;
@@ -113,6 +129,12 @@ export function FilterPanel({
 
       {open && (
         <div className="mt-3 space-y-5 rounded-xl border border-border-light bg-surface-card p-5 shadow-sm">
+          <div>
+            <SectionHeading>Saved</SectionHeading>
+            <button className={chipClass(favoritesOnly)} onClick={onToggleFavorites}>
+              {favoritesOnly ? "\u2605" : "\u2606"} {favoritesCount} saved
+            </button>
+          </div>
           {categories.length > 0 && (
             <FilterSection title="Categories" items={categories} active={activeCategories} onToggle={onToggleCategory} />
           )}
