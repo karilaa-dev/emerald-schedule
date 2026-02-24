@@ -46,9 +46,11 @@ async function fetchCached(endpoint: string): Promise<Response> {
   });
 }
 
+const port = Number(process.env.PORT) || 3000;
+
 Bun.serve({
-  port: 3000,
-  development: true,
+  port,
+  development: process.env.NODE_ENV !== "production",
   routes: {
     "/": homepage,
     "/sw.js": {
@@ -124,4 +126,4 @@ Bun.serve({
   },
 });
 
-console.log("Server running at http://localhost:3000");
+console.log(`Server running at http://localhost:${port}`);

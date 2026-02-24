@@ -33,6 +33,29 @@ bun --hot server.tsx
 
 Open [localhost:3000](http://localhost:3000).
 
+## Docker
+
+### Run with Docker
+
+```bash
+docker run -p 3000:3000 ghcr.io/karilaa-dev/emerald-schedule:latest
+```
+
+### Build locally
+
+```bash
+docker build -t emerald-schedule .
+docker run -p 3000:3000 emerald-schedule
+```
+
+### Docker Compose
+
+```bash
+docker compose up -d
+```
+
+Open [localhost:3000](http://localhost:3000).
+
 ## Project Structure
 
 ```
