@@ -2,7 +2,7 @@ import homepage from "./public/index.html";
 
 const API_KEY = "c21df843-40f8-490a-b09c-ea3399be72cf";
 const BASE_URL = "https://conventions.leapevent.tech/api";
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
 
 interface CacheEntry {
   data: string;
