@@ -68,6 +68,14 @@ Bun.serve({
         });
       },
     },
+    "/robots.txt": {
+      GET() {
+        return new Response(
+          "User-agent: *\nAllow: /\nSitemap: https://eccc26.karilaa.dev/sitemap.xml\n",
+          { headers: { "Content-Type": "text/plain" } },
+        );
+      },
+    },
     "/api/schedules": {
       GET(req: Request) {
         const ip = req.headers.get("x-forwarded-for") ?? "unknown";
@@ -97,6 +105,19 @@ Bun.serve({
     if (url.pathname.startsWith("/icons/")) {
       return new Response(Bun.file(`public${url.pathname}`), {
         headers: { "Content-Type": "image/svg+xml" },
+      });
+    }
+    if (url.pathname === "/public/manifest.json") {
+      return new Response(Bun.file("public/manifest.json"), {
+        headers: { "Content-Type": "application/manifest+json" },
+      });
+    }
+    if (url.pathname === "/og-image.png") {
+      return new Response(Bun.file("public/og-image.png"), {
+        headers: {
+          "Content-Type": "image/png",
+          "Cache-Control": "public, max-age=86400",
+        },
       });
     }
     return new Response("Not Found", { status: 404 });

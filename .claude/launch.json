@@ -3,7 +3,7 @@
   "configurations": [
     {
       "name": "dev",
-      "runtimeExecutable": "bun",
+      "runtimeExecutable": "/Users/karilaa/.bun/bin/bun",
       "runtimeArgs": ["run", "server.tsx"],
       "port": 3000
     }
