@@ -1,8 +1,15 @@
 import { useState, useCallback } from "react";
 import type { FilterState } from "../types.ts";
 
+const DAY_KEY = "eccc-selected-day";
+
+function getStoredDay(): string | null {
+  const v = localStorage.getItem(DAY_KEY);
+  return v === "all" ? null : v;
+}
+
 const initialState: FilterState = {
-  day: null,
+  day: getStoredDay(),
   categories: new Set(),
   tags: new Set(),
   locations: new Set(),
@@ -14,6 +21,7 @@ export function useFilters() {
   const [filters, setFilters] = useState<FilterState>(initialState);
 
   const setDay = useCallback((day: string | null) => {
+    localStorage.setItem(DAY_KEY, day ?? "all");
     setFilters((prev) => ({ ...prev, day }));
   }, []);
 

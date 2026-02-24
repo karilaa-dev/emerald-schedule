@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 interface Props {
   categories: string[];
@@ -12,6 +12,7 @@ interface Props {
   onToggleLocation: (loc: string) => void;
   onClear: () => void;
   hasActiveFilters: boolean;
+  searchBar?: ReactNode;
 }
 
 function FilterSection({
@@ -73,13 +74,14 @@ export function FilterPanel({
   onToggleLocation,
   onClear,
   hasActiveFilters,
+  searchBar,
 }: Props) {
   const [open, setOpen] = useState(false);
   const count = activeCategories.size + activeTags.size + activeLocations.size;
 
   return (
     <div>
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-3">
         <button
           className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-600 transition-all duration-200 ${
             open || hasActiveFilters
@@ -106,6 +108,7 @@ export function FilterPanel({
             Clear all
           </button>
         )}
+        {searchBar && <div className="flex-1 max-w-xs">{searchBar}</div>}
       </div>
 
       {open && (

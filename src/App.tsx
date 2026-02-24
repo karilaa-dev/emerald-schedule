@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import type { ScheduleEvent } from "./types.ts";
 import { useSchedule } from "./hooks/useSchedule.ts";
 import { useFavorites } from "./hooks/useFavorites.ts";
@@ -48,13 +48,26 @@ export function App() {
   const tags = useMemo(() => getUniqueTags(events), [events]);
   const locations = useMemo(() => getUniqueLocations(events), [events]);
 
-  const didAutoSelect = useRef(false);
+  // Auto-select first day only on first visit (no stored preference)
   useEffect(() => {
-    if (days.length > 0 && filters.day === null && !didAutoSelect.current) {
-      didAutoSelect.current = true;
+    if (days.length === 0) return;
+
+    const stored = localStorage.getItem("eccc-selected-day");
+
+    // First visit: no stored preference → pick the first day
+    if (stored === null) {
+      setDay(days[0]!);
+      return;
+    }
+
+    // User explicitly chose "All days" → respect it
+    if (stored === "all") return;
+
+    // Stored day no longer in schedule → reset to first day
+    if (!days.includes(stored)) {
       setDay(days[0]!);
     }
-  }, [days, filters.day, setDay]);
+  }, [days, setDay]);
 
   const filtered = useMemo(
     () => filterEvents(events, filters, favorites),
@@ -111,9 +124,6 @@ export function App() {
                 '26
               </span>
             </div>
-            <div className="flex-1 max-w-xs">
-              <SearchBar value={filters.search} onChange={setSearch} />
-            </div>
             <ThemeToggle theme={theme} onToggle={toggleTheme} />
           </div>
           <div className="pb-2 flex items-center gap-3 overflow-x-auto scrollbar-none">
@@ -140,6 +150,7 @@ export function App() {
             onToggleLocation={toggleLocation}
             onClear={clearFilters}
             hasActiveFilters={hasActiveFilters}
+            searchBar={<SearchBar value={filters.search} onChange={setSearch} />}
           />
         </div>
 
