@@ -11,7 +11,7 @@ function getSystemTheme(): Theme {
 function applyTheme(theme: Theme) {
   document.documentElement.classList.toggle("dark", theme === "dark");
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute("content", theme === "dark" ? "#1a1a1a" : "#047857");
+  if (meta) meta.setAttribute("content", theme === "dark" ? "#111113" : "#046a4e");
 }
 
 export function useTheme() {
