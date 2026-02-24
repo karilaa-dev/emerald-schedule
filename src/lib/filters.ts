@@ -7,28 +7,23 @@ export function filterEvents(
   favorites: Set<number>,
 ): ScheduleEvent[] {
   return events.filter((event) => {
-    // Day filter
     if (filters.day && getDayKey(event.start_time) !== filters.day) return false;
 
-    // Category filter
     if (filters.categories.size > 0) {
-      const eventCats = event.schedule_categories.map((c) => c.name);
-      if (!eventCats.some((c) => filters.categories.has(c))) return false;
+      const hasMatch = event.schedule_categories.some((c) => filters.categories.has(c.name));
+      if (!hasMatch) return false;
     }
 
-    // Tag filter
     if (filters.tags.size > 0) {
-      const eventTags = event.schedule_tags.map((t) => t.tag);
-      if (!eventTags.some((t) => filters.tags.has(t))) return false;
+      const hasMatch = event.schedule_tags.some((t) => filters.tags.has(t.tag));
+      if (!hasMatch) return false;
     }
 
-    // Location filter
     if (filters.locations.size > 0) {
       const loc = event.venue_location?.name ?? event.location;
       if (!filters.locations.has(loc)) return false;
     }
 
-    // Search filter
     if (filters.search) {
       const q = filters.search.toLowerCase();
       const searchable = [
@@ -43,37 +38,31 @@ export function filterEvents(
       if (!searchable.includes(q)) return false;
     }
 
-    // Favorites filter
     if (filters.favoritesOnly && !favorites.has(event.id)) return false;
 
     return true;
   });
 }
 
-/** Extract all unique categories from events */
+function collectUnique(events: ScheduleEvent[], extract: (e: ScheduleEvent) => string[]): string[] {
+  const values = new Set<string>();
+  for (const e of events) {
+    for (const v of extract(e)) values.add(v);
+  }
+  return [...values].sort();
+}
+
 export function getUniqueCategories(events: ScheduleEvent[]): string[] {
-  const cats = new Set<string>();
-  for (const e of events) {
-    for (const c of e.schedule_categories) cats.add(c.name);
-  }
-  return [...cats].sort();
+  return collectUnique(events, (e) => e.schedule_categories.map((c) => c.name));
 }
 
-/** Extract all unique tags from events */
 export function getUniqueTags(events: ScheduleEvent[]): string[] {
-  const tags = new Set<string>();
-  for (const e of events) {
-    for (const t of e.schedule_tags) tags.add(t.tag);
-  }
-  return [...tags].sort();
+  return collectUnique(events, (e) => e.schedule_tags.map((t) => t.tag));
 }
 
-/** Extract all unique locations from events */
 export function getUniqueLocations(events: ScheduleEvent[]): string[] {
-  const locs = new Set<string>();
-  for (const e of events) {
+  return collectUnique(events, (e) => {
     const loc = e.venue_location?.name ?? e.location;
-    if (loc) locs.add(loc);
-  }
-  return [...locs].sort();
+    return loc ? [loc] : [];
+  });
 }

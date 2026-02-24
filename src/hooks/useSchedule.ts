@@ -20,7 +20,7 @@ export function useSchedule() {
           localStorage.setItem(CACHE_KEY, JSON.stringify(data.schedules));
         } catch {}
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         if (cancelled) return;
         try {
           const cached = localStorage.getItem(CACHE_KEY);
@@ -30,7 +30,7 @@ export function useSchedule() {
             return;
           }
         } catch {}
-        setError(err.message);
+        setError(err instanceof Error ? err.message : "Unknown error");
       })
       .finally(() => {
         if (!cancelled) setLoading(false);

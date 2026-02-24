@@ -1,9 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const DISMISSED_KEY = "eccc-install-tip-dismissed";
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
+
 export function useInstallPrompt() {
-  const [prompt, setPrompt] = useState<any>(null);
+  const [prompt, setPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [dismissed, setDismissed] = useState(() => {
     try {
       return localStorage.getItem(DISMISSED_KEY) === "1";
@@ -15,13 +20,20 @@ export function useInstallPrompt() {
   useEffect(() => {
     const handler = (e: Event) => {
       e.preventDefault();
-      setPrompt(e);
+      setPrompt(e as BeforeInstallPromptEvent);
     };
     window.addEventListener("beforeinstallprompt", handler);
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
-  const install = async () => {
+  const dismiss = useCallback(() => {
+    setDismissed(true);
+    try {
+      localStorage.setItem(DISMISSED_KEY, "1");
+    } catch {}
+  }, []);
+
+  const install = useCallback(async () => {
     if (!prompt) return;
     prompt.prompt();
     const result = await prompt.userChoice;
@@ -29,16 +41,7 @@ export function useInstallPrompt() {
       setPrompt(null);
       dismiss();
     }
-  };
+  }, [prompt, dismiss]);
 
-  const dismiss = () => {
-    setDismissed(true);
-    try {
-      localStorage.setItem(DISMISSED_KEY, "1");
-    } catch {}
-  };
-
-  const visible = !!prompt && !dismissed;
-
-  return { visible, install, dismiss };
+  return { visible: !!prompt && !dismissed, install, dismiss };
 }

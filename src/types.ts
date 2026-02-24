@@ -55,34 +55,11 @@ export interface EventPerson {
   alt_name?: string;
 }
 
-export interface Person {
-  id: string;
-  uid: string;
-  first_name: string;
-  last_name: string;
-  alt_name: string;
-  bio: string;
-  known_for: string | null;
-  images: EventImage[];
-  twitter: string | null;
-  instagram: string | null;
-  youtube: string | null;
-  tiktok: string | null;
-  schedules: ScheduleEvent[];
-}
-
 export interface ScheduleApiResponse {
   event_id: string;
   event_name: string;
   event_slug: string;
   schedules: ScheduleEvent[];
-}
-
-export interface PeopleApiResponse {
-  event_id: string;
-  event_name: string;
-  event_slug: string;
-  people: Person[];
 }
 
 export interface FilterState {

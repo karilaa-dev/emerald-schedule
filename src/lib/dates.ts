@@ -50,8 +50,8 @@ export function formatDayShort(dayKey: string): string {
 
 /** "2026-03-05" → "3/5" */
 export function formatDayDate(dayKey: string): string {
-  const parts = dayKey.split("-").map(Number);
-  return `${parts[1]}/${parts[2]}`;
+  const [, m, d] = dayKey.split("-").map(Number);
+  return `${m}/${d}`;
 }
 
 /** Get the hour key for grouping: "2026-03-05 10:00:00" → "10" */

@@ -17,6 +17,8 @@ const initialState: FilterState = {
   favoritesOnly: false,
 };
 
+type SetField = "categories" | "tags" | "locations";
+
 export function useFilters() {
   const [filters, setFilters] = useState<FilterState>(initialState);
 
@@ -25,32 +27,18 @@ export function useFilters() {
     setFilters((prev) => ({ ...prev, day }));
   }, []);
 
-  const toggleCategory = useCallback((cat: string) => {
+  const toggleSetItem = useCallback((field: SetField, value: string) => {
     setFilters((prev) => {
-      const next = new Set(prev.categories);
-      if (next.has(cat)) next.delete(cat);
-      else next.add(cat);
-      return { ...prev, categories: next };
+      const next = new Set(prev[field]);
+      if (next.has(value)) next.delete(value);
+      else next.add(value);
+      return { ...prev, [field]: next };
     });
   }, []);
 
-  const toggleTag = useCallback((tag: string) => {
-    setFilters((prev) => {
-      const next = new Set(prev.tags);
-      if (next.has(tag)) next.delete(tag);
-      else next.add(tag);
-      return { ...prev, tags: next };
-    });
-  }, []);
-
-  const toggleLocation = useCallback((loc: string) => {
-    setFilters((prev) => {
-      const next = new Set(prev.locations);
-      if (next.has(loc)) next.delete(loc);
-      else next.add(loc);
-      return { ...prev, locations: next };
-    });
-  }, []);
+  const toggleCategory = useCallback((cat: string) => toggleSetItem("categories", cat), [toggleSetItem]);
+  const toggleTag = useCallback((tag: string) => toggleSetItem("tags", tag), [toggleSetItem]);
+  const toggleLocation = useCallback((loc: string) => toggleSetItem("locations", loc), [toggleSetItem]);
 
   const setSearch = useCallback((search: string) => {
     setFilters((prev) => ({ ...prev, search }));
@@ -63,7 +51,7 @@ export function useFilters() {
   const clearFilters = useCallback(() => {
     setFilters((prev) => ({
       ...initialState,
-      day: prev.day, // keep day selection
+      day: prev.day,
     }));
   }, []);
 

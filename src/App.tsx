@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import type { ScheduleEvent } from "./types.ts";
 import { useSchedule } from "./hooks/useSchedule.ts";
 import { useFavorites } from "./hooks/useFavorites.ts";
@@ -83,15 +83,15 @@ export function App() {
     }
   }, [events]);
 
-  const handleSelectEvent = (event: ScheduleEvent) => {
+  const handleSelectEvent = useCallback((event: ScheduleEvent) => {
     setSelectedEvent(event);
     window.location.hash = `event-${event.id}`;
-  };
+  }, []);
 
-  const handleCloseDetail = () => {
+  const handleCloseDetail = useCallback(() => {
     setSelectedEvent(null);
     history.replaceState(null, "", window.location.pathname);
-  };
+  }, []);
 
   if (error) {
     return (
@@ -154,7 +154,7 @@ export function App() {
           />
         </div>
 
-        {loading ? (
+        {loading && (
           <div className="space-y-6 py-6">
             {[...Array(5)].map((_, i) => (
               <div key={i} className="flex gap-5">
@@ -173,9 +173,13 @@ export function App() {
               </div>
             ))}
           </div>
-        ) : filtered.length === 0 ? (
+        )}
+
+        {!loading && filtered.length === 0 && (
           <EmptyState hasFilters={hasActiveFilters} onClear={clearFilters} />
-        ) : (
+        )}
+
+        {!loading && filtered.length > 0 && (
           <p className="mb-3 font-display text-xs font-600 text-ink-faint uppercase tracking-widest">
             {filtered.length} event{filtered.length !== 1 ? "s" : ""}
             {filters.search && filters.day && (

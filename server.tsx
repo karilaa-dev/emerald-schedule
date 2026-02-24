@@ -55,14 +55,10 @@ Bun.serve({
       },
     },
     "/api/schedules": {
-      async GET() {
-        return fetchCached("schedules");
-      },
+      GET: () => fetchCached("schedules"),
     },
     "/api/people": {
-      async GET() {
-        return fetchCached("people?schedule=1");
-      },
+      GET: () => fetchCached("people?schedule=1"),
     },
   },
   fetch(req) {
