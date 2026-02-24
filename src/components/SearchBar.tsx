@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 
 interface Props {
   value: string;
@@ -6,17 +6,19 @@ interface Props {
 }
 
 export function SearchBar({ value, onChange }: Props) {
-  const [local, setLocal] = useState(value);
+  const [pending, setPending] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(null);
 
-  useEffect(() => {
-    setLocal(value);
-  }, [value]);
+  const displayed = pending ?? value;
 
   const handleChange = (newValue: string) => {
-    setLocal(newValue);
+    setPending(newValue);
     if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => onChange(newValue), 300);
+    timerRef.current = setTimeout(() => {
+      setPending(null);
+      timerRef.current = null;
+      onChange(newValue);
+    }, 300);
   };
 
   return (
@@ -34,10 +36,10 @@ export function SearchBar({ value, onChange }: Props) {
         type="text"
         placeholder="Search events..."
         className="w-full rounded-full border border-border bg-surface py-2 pl-9 pr-8 text-sm text-ink placeholder-ink-faint outline-none transition-all focus:border-accent focus:ring-2 focus:ring-accent/10 focus:bg-surface-card"
-        value={local}
+        value={displayed}
         onChange={(e) => handleChange(e.target.value)}
       />
-      {local && (
+      {displayed && (
         <button
           className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full h-5 w-5 flex items-center justify-center bg-ink-faint/20 text-ink-muted hover:bg-ink-faint/40 transition-colors text-xs leading-none"
           onClick={() => handleChange("")}

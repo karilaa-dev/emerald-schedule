@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import type { ScheduleEvent } from "../types.ts";
 import { formatTimeRange, formatDayLabel, getDayKey } from "../lib/dates.ts";
 import { getCategoryColor } from "../lib/colors.ts";
@@ -28,7 +28,7 @@ export function EventDetail({ event, isFavorite, onToggleFavorite, onClose }: Pr
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-      <div className="animate-backdrop absolute inset-0 bg-ink/30 backdrop-blur-sm" onClick={onClose} />
+      <div role="presentation" className="animate-backdrop absolute inset-0 bg-ink/30 backdrop-blur-sm" onClick={onClose} />
       <div className="animate-modal relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl bg-surface-card shadow-2xl">
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border-light bg-surface-card/95 backdrop-blur-md px-5 py-3">
@@ -120,9 +120,9 @@ export function EventDetail({ event, isFavorite, onToggleFavorite, onClose }: Pr
 
           {/* Description */}
           {event.description && (
-            <div
+            <HtmlContent
+              html={linkifyHtml(event.description)}
               className="text-sm text-ink-muted leading-relaxed whitespace-pre-line [&_a]:text-accent [&_a]:underline [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-4 [&_li]:mb-1"
-              dangerouslySetInnerHTML={{ __html: linkifyHtml(event.description) }}
             />
           )}
 
@@ -171,4 +171,12 @@ export function EventDetail({ event, isFavorite, onToggleFavorite, onClose }: Pr
       </div>
     </div>
   );
+}
+
+function HtmlContent({ html, className }: { html: string; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (ref.current) ref.current.innerHTML = html;
+  }, [html]);
+  return <div ref={ref} className={className} />;
 }

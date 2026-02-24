@@ -11,7 +11,7 @@ export async function fetchSchedules(): Promise<ScheduleApiResponse> {
   return res.json();
 }
 
-export interface ScheduleStatus {
+interface ScheduleStatus {
   hash: string;
   cachedAt: number;
 }

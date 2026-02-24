@@ -7,7 +7,7 @@ const MONTH_NAMES = [
 ];
 
 /** Parse "YYYY-MM-DD HH:MM:SS" as a local Date (times are Pacific, displayed as-is) */
-export function parseTime(timeStr: string): Date {
+function parseTime(timeStr: string): Date {
   const [datePart, timePart] = timeStr.split(" ");
   const [y, m, d] = datePart!.split("-").map(Number);
   const [h, min, s] = (timePart ?? "00:00:00").split(":").map(Number);
@@ -15,7 +15,7 @@ export function parseTime(timeStr: string): Date {
 }
 
 /** "2026-03-05 10:00:00" → "10:00 AM" */
-export function formatTime(timeStr: string): string {
+function formatTime(timeStr: string): string {
   const date = parseTime(timeStr);
   const h = date.getHours();
   const m = date.getMinutes();

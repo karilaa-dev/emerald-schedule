@@ -15,10 +15,13 @@ export function EventCard({ event, isFavorite, onToggleFavorite, onSelect, index
   const location = event.venue_location?.name ?? event.location;
 
   return (
-    <div
+    <article
+      role="button"
+      tabIndex={0}
       className="animate-card-in group relative rounded-xl border border-border-light bg-surface-card p-3.5 cursor-pointer transition-all duration-200 hover:shadow-lg hover:shadow-accent/5 hover:-translate-y-0.5 hover:border-accent/20"
       style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
       onClick={() => onSelect(event)}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect(event); } }}
     >
       <button
         className={`absolute top-2.5 right-2.5 flex items-center justify-center rounded-full p-1.5 transition-colors duration-150 ${
@@ -71,6 +74,6 @@ export function EventCard({ event, isFavorite, onToggleFavorite, onSelect, index
           })}
         </div>
       )}
-    </div>
+    </article>
   );
 }

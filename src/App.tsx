@@ -165,14 +165,14 @@ export function App() {
 
         {loading && (
           <div className="space-y-6 py-6">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="flex gap-5">
+            {["a", "b", "c", "d", "e"].map((row) => (
+              <div key={row} className="flex gap-5">
                 <div className="w-16 shrink-0 pt-1">
                   <div className="skeleton h-4 w-14 ml-auto" />
                 </div>
                 <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {[...Array(3)].map((_, j) => (
-                    <div key={j} className="rounded-xl border border-border-light bg-surface-card p-4 space-y-3">
+                  {["x", "y", "z"].map((col) => (
+                    <div key={col} className="rounded-xl border border-border-light bg-surface-card p-4 space-y-3">
                       <div className="skeleton h-4 w-4/5" />
                       <div className="skeleton h-3 w-3/5" />
                       <div className="skeleton h-3 w-2/5" />
