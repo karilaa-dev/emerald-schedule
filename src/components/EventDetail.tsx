@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import type { ScheduleEvent } from "../types.ts";
 import { formatTimeRange, formatDayLabel, getDayKey } from "../lib/dates.ts";
 import { getCategoryColor } from "../lib/colors.ts";
-import { decodeEntities } from "../lib/html.ts";
+import { decodeEntities, linkifyHtml } from "../lib/html.ts";
 
 interface Props {
   event: ScheduleEvent;
@@ -116,8 +116,8 @@ export function EventDetail({ event, isFavorite, onToggleFavorite, onClose }: Pr
           {/* Description */}
           {event.description && (
             <div
-              className="text-sm text-ink-muted leading-relaxed [&_a]:text-accent [&_a]:underline [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-4 [&_li]:mb-1"
-              dangerouslySetInnerHTML={{ __html: event.description }}
+              className="text-sm text-ink-muted leading-relaxed whitespace-pre-line [&_a]:text-accent [&_a]:underline [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-4 [&_li]:mb-1"
+              dangerouslySetInnerHTML={{ __html: linkifyHtml(event.description) }}
             />
           )}
 

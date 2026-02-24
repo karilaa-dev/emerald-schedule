@@ -1,9 +1,9 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import type { ScheduleEvent } from "./types.ts";
 import { useSchedule } from "./hooks/useSchedule.ts";
 import { useFavorites } from "./hooks/useFavorites.ts";
 import { useFilters } from "./hooks/useFilters.ts";
-import { getUniqueDays } from "./lib/dates.ts";
+import { getUniqueDays, formatDayShort, formatDayDate } from "./lib/dates.ts";
 import {
   filterEvents,
   getUniqueCategories,
@@ -45,8 +45,10 @@ export function App() {
   const tags = useMemo(() => getUniqueTags(events), [events]);
   const locations = useMemo(() => getUniqueLocations(events), [events]);
 
+  const didAutoSelect = useRef(false);
   useEffect(() => {
-    if (days.length > 0 && filters.day === null) {
+    if (days.length > 0 && filters.day === null && !didAutoSelect.current) {
+      didAutoSelect.current = true;
       setDay(days[0]!);
     }
   }, [days, filters.day, setDay]);
@@ -161,12 +163,18 @@ export function App() {
         ) : (
           <p className="mb-3 font-display text-xs font-600 text-ink-faint uppercase tracking-widest">
             {filtered.length} event{filtered.length !== 1 ? "s" : ""}
+            {filters.search && filters.day && (
+              <span className="normal-case tracking-normal">
+                {" "}on {formatDayShort(filters.day)} {formatDayDate(filters.day)}
+              </span>
+            )}
           </p>
         )}
 
         <Timeline
           events={filtered}
           favorites={favorites}
+          allDays={filters.day === null}
           onToggleFavorite={toggleFavorite}
           onSelectEvent={handleSelectEvent}
         />
