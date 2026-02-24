@@ -12,7 +12,9 @@ import {
 } from "./lib/filters.ts";
 import { useOnlineStatus } from "./hooks/useOnlineStatus.ts";
 import { useInstallPrompt } from "./hooks/useInstallPrompt.ts";
+import { useTheme } from "./hooks/useTheme.ts";
 import { DayTabs } from "./components/DayTabs.tsx";
+import { ThemeToggle } from "./components/ThemeToggle.tsx";
 import { SearchBar } from "./components/SearchBar.tsx";
 import { FilterPanel } from "./components/FilterPanel.tsx";
 import { Timeline } from "./components/Timeline.tsx";
@@ -26,6 +28,7 @@ export function App() {
   const { events, loading, error, isStale } = useSchedule();
   const isOnline = useOnlineStatus();
   const { visible: showInstallTip, install, dismiss: dismissInstallTip } = useInstallPrompt();
+  const { theme, toggle: toggleTheme } = useTheme();
   const { favorites, toggle: toggleFavorite, count: favoriteCount } = useFavorites();
   const {
     filters,
@@ -111,6 +114,7 @@ export function App() {
             <div className="flex-1 max-w-xs">
               <SearchBar value={filters.search} onChange={setSearch} />
             </div>
+            <ThemeToggle theme={theme} onToggle={toggleTheme} />
           </div>
           <div className="pb-2 flex items-center gap-3 overflow-x-auto scrollbar-none">
             <DayTabs days={days} activeDay={filters.day} onSelectDay={setDay} />

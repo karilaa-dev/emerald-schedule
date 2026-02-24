@@ -10,6 +10,37 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="../src/styles.css" />
+    <style>
+      /* Dark mode overrides — inline to bypass Tailwind bundler tree-shaking */
+      .dark {
+        --color-surface: #141416;
+        --color-surface-warm: #1e1e21;
+        --color-surface-card: #222225;
+        --color-ink: #e8e6e3;
+        --color-ink-muted: #9a9a9a;
+        --color-ink-faint: #5c5c5c;
+        --color-accent: #34d399;
+        --color-accent-light: #064e3b;
+        --color-accent-subtle: #0a2620;
+        --color-border: #2e2e32;
+        --color-border-light: #262628;
+        --color-favorite: #fbbf24;
+        --color-divider: #262628;
+      }
+      .dark body::before { opacity: 0.04; mix-blend-mode: overlay; }
+      .dark .skeleton {
+        background: linear-gradient(90deg, #2a2a2e 25%, #333338 50%, #2a2a2e 75%);
+        background-size: 200% 100%;
+      }
+    </style>
+    <script>
+      // Apply dark mode before first paint to prevent flash
+      (function() {
+        var t = localStorage.getItem('eccc-theme');
+        var dark = t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches);
+        if (dark) document.documentElement.classList.add('dark');
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

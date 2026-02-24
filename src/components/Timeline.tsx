@@ -26,7 +26,7 @@ export function Timeline({ events, favorites, allDays, onToggleFavorite, onSelec
                 {formatDayLabel(day)}
               </h2>
             </div>
-            <div className="divide-y divide-zinc-100">
+            <div className="divide-y divide-divider">
               {[...hours.entries()].map(([hour, hourEvents]) => (
                 <TimeSlot
                   key={hour}
@@ -47,7 +47,7 @@ export function Timeline({ events, favorites, allDays, onToggleFavorite, onSelec
   const grouped = groupByHour(events);
 
   return (
-    <div className="divide-y divide-zinc-100">
+    <div className="divide-y divide-divider">
       {[...grouped.entries()].map(([hour, hourEvents]) => (
         <TimeSlot
           key={hour}
