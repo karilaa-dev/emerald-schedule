@@ -10,6 +10,8 @@ import {
   getUniqueTags,
   getUniqueLocations,
 } from "./lib/filters.ts";
+import { useOnlineStatus } from "./hooks/useOnlineStatus.ts";
+import { useInstallPrompt } from "./hooks/useInstallPrompt.ts";
 import { DayTabs } from "./components/DayTabs.tsx";
 import { SearchBar } from "./components/SearchBar.tsx";
 import { FilterPanel } from "./components/FilterPanel.tsx";
@@ -17,9 +19,13 @@ import { Timeline } from "./components/Timeline.tsx";
 import { EventDetail } from "./components/EventDetail.tsx";
 import { FavoritesBar } from "./components/FavoritesBar.tsx";
 import { EmptyState } from "./components/EmptyState.tsx";
+import { OfflineBanner } from "./components/OfflineBanner.tsx";
+import { InstallTip } from "./components/InstallTip.tsx";
 
 export function App() {
-  const { events, loading, error } = useSchedule();
+  const { events, loading, error, isStale } = useSchedule();
+  const isOnline = useOnlineStatus();
+  const { visible: showInstallTip, install, dismiss: dismissInstallTip } = useInstallPrompt();
   const { favorites, toggle: toggleFavorite, count: favoriteCount } = useFavorites();
   const {
     filters,
@@ -109,6 +115,9 @@ export function App() {
           </div>
         </div>
       </header>
+
+      <InstallTip visible={showInstallTip} onInstall={install} onDismiss={dismissInstallTip} />
+      <OfflineBanner visible={!isOnline || isStale} />
 
       {/* Main */}
       <main className="mx-auto max-w-5xl px-4 sm:px-6 py-5">

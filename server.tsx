@@ -37,6 +37,23 @@ Bun.serve({
   development: true,
   routes: {
     "/": homepage,
+    "/sw.js": {
+      GET() {
+        return new Response(Bun.file("public/sw.js"), {
+          headers: {
+            "Content-Type": "application/javascript",
+            "Cache-Control": "no-cache",
+          },
+        });
+      },
+    },
+    "/manifest.json": {
+      GET() {
+        return new Response(Bun.file("public/manifest.json"), {
+          headers: { "Content-Type": "application/manifest+json" },
+        });
+      },
+    },
     "/api/schedules": {
       async GET() {
         return fetchCached("schedules");
@@ -47,6 +64,15 @@ Bun.serve({
         return fetchCached("people?schedule=1");
       },
     },
+  },
+  fetch(req) {
+    const url = new URL(req.url);
+    if (url.pathname.startsWith("/icons/")) {
+      return new Response(Bun.file(`public${url.pathname}`), {
+        headers: { "Content-Type": "image/svg+xml" },
+      });
+    }
+    return new Response("Not Found", { status: 404 });
   },
 });
 
