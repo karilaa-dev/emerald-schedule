@@ -129,6 +129,9 @@ export function App() {
               <span className="font-display text-xl font-800 tracking-tight text-accent">
                 '26
               </span>
+              <span className="font-display text-xl font-800 tracking-tight text-ink">
+                Schedule
+              </span>
             </div>
             <ThemeToggle theme={theme} onToggle={toggleTheme} />
           </div>
