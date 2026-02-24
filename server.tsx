@@ -6,10 +6,24 @@ const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
 
 interface CacheEntry {
   data: string;
+  hash: string;
   timestamp: number;
 }
 
 const cache = new Map<string, CacheEntry>();
+
+const RATE_LIMIT = 4;
+const RATE_WINDOW = 60_000; // 1 minute
+const requestLog = new Map<string, number[]>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const timestamps = (requestLog.get(ip) ?? []).filter((t) => now - t < RATE_WINDOW);
+  requestLog.set(ip, timestamps);
+  if (timestamps.length >= RATE_LIMIT) return true;
+  timestamps.push(now);
+  return false;
+}
 
 async function fetchCached(endpoint: string): Promise<Response> {
   const now = Date.now();
@@ -25,7 +39,7 @@ async function fetchCached(endpoint: string): Promise<Response> {
   const upstream = await fetch(url);
   const data = await upstream.text();
 
-  cache.set(endpoint, { data, timestamp: now });
+  cache.set(endpoint, { data, hash: Bun.hash(data).toString(36), timestamp: now });
 
   return new Response(data, {
     headers: { "Content-Type": "application/json" },
@@ -55,7 +69,24 @@ Bun.serve({
       },
     },
     "/api/schedules": {
-      GET: () => fetchCached("schedules"),
+      GET(req: Request) {
+        const ip = req.headers.get("x-forwarded-for") ?? "unknown";
+        if (isRateLimited(ip)) {
+          return new Response("Too Many Requests", { status: 429 });
+        }
+        return fetchCached("schedules");
+      },
+    },
+    "/api/schedules/status": {
+      async GET() {
+        const entry = cache.get("schedules");
+        if (entry && Date.now() - entry.timestamp < CACHE_TTL) {
+          return Response.json({ hash: entry.hash, cachedAt: entry.timestamp });
+        }
+        await fetchCached("schedules");
+        const filled = cache.get("schedules")!;
+        return Response.json({ hash: filled.hash, cachedAt: filled.timestamp });
+      },
     },
     "/api/people": {
       GET: () => fetchCached("people?schedule=1"),

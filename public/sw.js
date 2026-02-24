@@ -54,7 +54,12 @@ async function networkFirst(request) {
     return response;
   } catch {
     const cached = await caches.match(request);
-    if (cached) return cached;
+    if (cached) {
+      // Mark as served from SW cache so client knows it's offline
+      const headers = new Headers(cached.headers);
+      headers.set("X-SW-Cache", "1");
+      return new Response(cached.body, { status: cached.status, headers });
+    }
     return new Response("Offline", { status: 503 });
   }
 }

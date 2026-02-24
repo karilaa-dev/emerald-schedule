@@ -23,9 +23,10 @@ import { FavoritesBar } from "./components/FavoritesBar.tsx";
 import { EmptyState } from "./components/EmptyState.tsx";
 import { OfflineBanner } from "./components/OfflineBanner.tsx";
 import { InstallTip } from "./components/InstallTip.tsx";
+import { ScheduleFooter } from "./components/ScheduleFooter.tsx";
 
 export function App() {
-  const { events, loading, error, isStale } = useSchedule();
+  const { events, loading, error, isStale, lastChecked, lastUpdated, checkNow, forceUpdate } = useSchedule();
   const isOnline = useOnlineStatus();
   const { visible: showInstallTip, install, dismiss: dismissInstallTip } = useInstallPrompt();
   const { theme, toggle: toggleTheme } = useTheme();
@@ -198,6 +199,8 @@ export function App() {
           onSelectEvent={handleSelectEvent}
         />
       </main>
+
+      <ScheduleFooter lastChecked={lastChecked} lastUpdated={lastUpdated} onCheck={checkNow} onForceUpdate={forceUpdate} />
 
       <FavoritesBar
         count={favoriteCount}
