@@ -83,9 +83,13 @@ export function App() {
   useEffect(() => {
     const hash = window.location.hash;
     if (hash.startsWith("#event-") && events.length > 0) {
-      const id = Number(hash.slice(7));
-      const event = events.find((e) => e.id === id);
-      if (event) setSelectedEvent(event);
+      const id = hash.slice(7);
+      const event = events.find((e) => String(e.id) === id);
+      if (event) {
+        setSelectedEvent(event);
+        const eventDay = getDayKey(event.start_time);
+        if (filters.day !== eventDay) setDay(eventDay);
+      }
     }
   }, [events]);
 
