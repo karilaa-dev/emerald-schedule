@@ -1,5 +1,5 @@
 import type { ScheduleEvent } from "../types.ts";
-import { groupByHour, groupByDayAndHour, formatDayLabel } from "../lib/dates.ts";
+import { groupByHour, groupByDayAndHour } from "../lib/dates.ts";
 import { TimeSlot } from "./TimeSlot.tsx";
 
 interface Props {
@@ -59,12 +59,7 @@ export function Timeline({ events, favorites, allDays, compact, onToggleFavorite
   return (
     <div>
       {groupByDayAndHour(events).map(({ day, hours }) => (
-        <section key={day} className="mb-6">
-          <div className="sticky top-[5.5rem] z-10 -mx-4 px-4 sm:-mx-6 sm:px-6 py-2 bg-surface/95 backdrop-blur-sm border-b border-border-light">
-            <h2 className="font-display text-sm font-700 text-ink tracking-wide">
-              {formatDayLabel(day)}
-            </h2>
-          </div>
+        <section key={day}>
           <HourList
             hours={hours}
             favorites={favorites}
