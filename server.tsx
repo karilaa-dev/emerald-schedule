@@ -25,25 +25,15 @@ function isRateLimited(ip: string): boolean {
   return false;
 }
 
-async function fetchCached(endpoint: string): Promise<Response> {
+async function ensureCached(endpoint: string): Promise<void> {
   const now = Date.now();
   const cached = cache.get(endpoint);
-
-  if (cached && now - cached.timestamp < CACHE_TTL) {
-    return new Response(cached.data, {
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+  if (cached && now - cached.timestamp < CACHE_TTL) return;
 
   const url = `${BASE_URL}/${endpoint}?key=${API_KEY}`;
   const upstream = await fetch(url);
   const data = await upstream.text();
-
   cache.set(endpoint, { data, hash: Bun.hash(data).toString(36), timestamp: now });
-
-  return new Response(data, {
-    headers: { "Content-Type": "application/json" },
-  });
 }
 
 const port = Number(process.env.PORT) || 3000;
@@ -79,27 +69,69 @@ Bun.serve({
       },
     },
     "/api/schedules": {
-      GET(req: Request) {
+      async GET(req: Request) {
+        const requestedHash = new URL(req.url).searchParams.get("hash");
+
+        await ensureCached("schedules");
+        const entry = cache.get("schedules")!;
+
+        if (requestedHash && requestedHash !== entry.hash) {
+          return Response.json(
+            { error: "hash_mismatch", currentHash: entry.hash },
+            {
+              status: 404,
+              headers: { "Cache-Control": "no-store" },
+            },
+          );
+        }
+
+        const parsed = JSON.parse(entry.data);
+        const body = JSON.stringify({ ...parsed, hash: entry.hash, cachedAt: entry.timestamp });
+
+        return new Response(body, {
+          headers: {
+            "Content-Type": "application/json",
+            "Cache-Control": requestedHash
+              ? "public, max-age=300, s-maxage=86400"
+              : "public, max-age=60, s-maxage=300",
+          },
+        });
+      },
+    },
+    "/api/schedules/status": {
+      async GET(req: Request) {
         const ip = req.headers.get("x-forwarded-for") ?? "unknown";
         if (isRateLimited(ip)) {
           return new Response("Too Many Requests", { status: 429 });
         }
-        return fetchCached("schedules");
-      },
-    },
-    "/api/schedules/status": {
-      async GET() {
-        const entry = cache.get("schedules");
-        if (entry && Date.now() - entry.timestamp < CACHE_TTL) {
-          return Response.json({ hash: entry.hash, cachedAt: entry.timestamp });
+
+        await ensureCached("schedules");
+        const entry = cache.get("schedules")!;
+
+        const clientHash = new URL(req.url).searchParams.get("hash");
+        const headers = {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+        };
+
+        if (clientHash && clientHash === entry.hash) {
+          return new Response(JSON.stringify({ changed: false }), { headers });
         }
-        await fetchCached("schedules");
-        const filled = cache.get("schedules")!;
-        return Response.json({ hash: filled.hash, cachedAt: filled.timestamp });
+
+        return new Response(
+          JSON.stringify({ changed: true, hash: entry.hash }),
+          { headers },
+        );
       },
     },
     "/api/people": {
-      GET: () => fetchCached("people?schedule=1"),
+      async GET() {
+        await ensureCached("people?schedule=1");
+        const entry = cache.get("people?schedule=1")!;
+        return new Response(entry.data, {
+          headers: { "Content-Type": "application/json" },
+        });
+      },
     },
   },
   fetch(req) {

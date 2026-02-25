@@ -3,6 +3,7 @@ import type { ScheduleEvent } from "../types.ts";
 import { fetchSchedules, fetchScheduleStatus, OfflineError } from "../lib/api.ts";
 
 const CACHE_KEY = "eccc-schedule-cache";
+const HASH_KEY = "eccc-schedule-hash";
 const POLL_INTERVAL = 15 * 60 * 1000; // 15 minutes
 const CHECK_RATE_LIMIT = 4;
 const CHECK_RATE_WINDOW = 15_000; // 15 seconds
@@ -32,14 +33,15 @@ export function useSchedule() {
   const checkRate = useRef(makeRateLimiter(CHECK_RATE_LIMIT, CHECK_RATE_WINDOW));
   const fetchRate = useRef(makeRateLimiter(FETCH_RATE_LIMIT, FETCH_RATE_WINDOW));
 
-  const updateSchedule = useCallback(async () => {
-    const now = Date.now();
-    const data = await fetchSchedules();
+  const updateSchedule = useCallback(async (hash: string) => {
+    const data = await fetchSchedules(hash);
     setEvents(data.schedules);
     setIsStale(false);
-    setLastUpdated(now);
+    setLastUpdated(data.cachedAt);
+    hashRef.current = data.hash;
     try {
       localStorage.setItem(CACHE_KEY, JSON.stringify(data.schedules));
+      localStorage.setItem(HASH_KEY, data.hash);
     } catch {}
   }, []);
 
@@ -48,17 +50,15 @@ export function useSchedule() {
     if (checkRate.current.limited()) return;
     checkRate.current.record();
     try {
-      const status = await fetchScheduleStatus();
-      const now = Date.now();
-      setLastChecked(now);
+      const status = await fetchScheduleStatus(hashRef.current ?? undefined);
+      setLastChecked(Date.now());
       setIsStale(false);
-      if (hashRef.current && status.hash !== hashRef.current) {
+      if (status.changed && status.hash) {
         if (!fetchRate.current.limited()) {
           fetchRate.current.record();
-          await updateSchedule();
+          await updateSchedule(status.hash);
         }
       }
-      hashRef.current = status.hash;
     } catch (err) {
       if (err instanceof OfflineError || err instanceof TypeError) setIsStale(true);
     }
@@ -69,9 +69,10 @@ export function useSchedule() {
     if (fetchRate.current.limited()) return;
     fetchRate.current.record();
     try {
-      await updateSchedule();
       const status = await fetchScheduleStatus();
-      hashRef.current = status.hash;
+      if (status.hash) {
+        await updateSchedule(status.hash);
+      }
       setLastChecked(Date.now());
       setIsStale(false);
     } catch (err) {
@@ -81,42 +82,54 @@ export function useSchedule() {
 
   useEffect(() => {
     let cancelled = false;
-    const now = Date.now();
 
-    fetchSchedules()
-      .then((data) => {
+    const init = async () => {
+      try {
+        const storedHash = localStorage.getItem(HASH_KEY) ?? undefined;
+        const status = await fetchScheduleStatus(storedHash);
         if (cancelled) return;
-        setEvents(data.schedules);
-        setLastUpdated(now);
-        try {
-          localStorage.setItem(CACHE_KEY, JSON.stringify(data.schedules));
-        } catch {}
-        return fetchScheduleStatus();
-      })
-      .then((status) => {
-        if (cancelled || !status) return;
-        hashRef.current = status.hash;
-        setLastChecked(now);
-      })
-      .catch((err: unknown) => {
+        setLastChecked(Date.now());
+
+        if (status.changed && status.hash) {
+          fetchRate.current.record();
+          await updateSchedule(status.hash);
+        } else {
+          // Data unchanged — load from localStorage
+          const cached = localStorage.getItem(CACHE_KEY);
+          if (cached) {
+            setEvents(JSON.parse(cached));
+            hashRef.current = storedHash ?? null;
+          } else {
+            // No localStorage but status said unchanged — shouldn't happen, force fetch
+            const fresh = await fetchScheduleStatus();
+            if (cancelled) return;
+            if (fresh.hash) {
+              fetchRate.current.record();
+              await updateSchedule(fresh.hash);
+            }
+          }
+        }
+      } catch (err: unknown) {
         if (cancelled) return;
         const isOffline = err instanceof OfflineError || err instanceof TypeError;
         try {
           const cached = localStorage.getItem(CACHE_KEY);
           if (cached) {
             setEvents(JSON.parse(cached));
+            hashRef.current = localStorage.getItem(HASH_KEY) ?? null;
             if (isOffline) setIsStale(true);
             return;
           }
         } catch {}
         setError(err instanceof Error ? err.message : "Unknown error");
-      })
-      .finally(() => {
+      } finally {
         if (!cancelled) setLoading(false);
-      });
+      }
+    };
 
+    init();
     return () => { cancelled = true; };
-  }, []);
+  }, [updateSchedule]);
 
   // Poll for updates every 15 minutes
   useEffect(() => {

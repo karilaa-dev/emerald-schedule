@@ -62,6 +62,11 @@ export interface ScheduleApiResponse {
   schedules: ScheduleEvent[];
 }
 
+export interface ScheduleApiResponseWithMeta extends ScheduleApiResponse {
+  hash: string;
+  cachedAt: number;
+}
+
 export interface FilterState {
   day: string | null;
   categories: Set<string>;
