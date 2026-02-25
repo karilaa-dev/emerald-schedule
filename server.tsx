@@ -31,16 +31,7 @@ Bun.serve({
   port,
   development: process.env.NODE_ENV !== "production",
   routes: {
-    "/": {
-      GET() {
-        return new Response(Bun.file("public/index.html"), {
-          headers: {
-            "Content-Type": "text/html; charset=utf-8",
-            "Cache-Control": "public, max-age=300, s-maxage=3600",
-          },
-        });
-      },
-    },
+    "/": homepage,
     "/sw.js": {
       GET() {
         return new Response(Bun.file("public/sw.js"), {
@@ -54,7 +45,10 @@ Bun.serve({
     "/manifest.json": {
       GET() {
         return new Response(Bun.file("public/manifest.json"), {
-          headers: { "Content-Type": "application/manifest+json" },
+          headers: {
+            "Content-Type": "application/manifest+json",
+            "Cache-Control": "public, max-age=86400",
+          },
         });
       },
     },
@@ -62,7 +56,7 @@ Bun.serve({
       GET() {
         return new Response(
           "User-agent: *\nAllow: /\nSitemap: https://eccc26.karilaa.dev/sitemap.xml\n",
-          { headers: { "Content-Type": "text/plain" } },
+          { headers: { "Content-Type": "text/plain", "Cache-Control": "public, max-age=86400" } },
         );
       },
     },
@@ -107,7 +101,10 @@ Bun.serve({
       async GET() {
         const entry = await ensureCached("people?schedule=1");
         return new Response(entry.data, {
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Cache-Control": "public, max-age=300, s-maxage=86400",
+          },
         });
       },
     },
@@ -116,12 +113,18 @@ Bun.serve({
     const url = new URL(req.url);
     if (url.pathname.startsWith("/icons/")) {
       return new Response(Bun.file(`public${url.pathname}`), {
-        headers: { "Content-Type": "image/svg+xml" },
+        headers: {
+          "Content-Type": "image/svg+xml",
+          "Cache-Control": "public, max-age=86400",
+        },
       });
     }
     if (url.pathname === "/public/manifest.json") {
       return new Response(Bun.file("public/manifest.json"), {
-        headers: { "Content-Type": "application/manifest+json" },
+        headers: {
+          "Content-Type": "application/manifest+json",
+          "Cache-Control": "public, max-age=86400",
+        },
       });
     }
     if (url.pathname === "/og-image.png") {
