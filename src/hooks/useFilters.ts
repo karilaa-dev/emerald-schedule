@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import type { FilterState } from "../types.ts";
 
 const DAY_KEY = "eccc-selected-day";
+const FAVORITES_FILTER_KEY = "eccc-favorites-only";
 
 function getStoredDay(): string | null {
   const v = localStorage.getItem(DAY_KEY);
@@ -14,7 +15,7 @@ const initialState: FilterState = {
   tags: new Set(),
   locations: new Set(),
   search: "",
-  favoritesOnly: false,
+  favoritesOnly: localStorage.getItem(FAVORITES_FILTER_KEY) === "true",
 };
 
 type SetField = "categories" | "tags" | "locations";
@@ -45,13 +46,19 @@ export function useFilters() {
   }, []);
 
   const toggleFavoritesOnly = useCallback(() => {
-    setFilters((prev) => ({ ...prev, favoritesOnly: !prev.favoritesOnly }));
+    setFilters((prev) => {
+      const next = !prev.favoritesOnly;
+      localStorage.setItem(FAVORITES_FILTER_KEY, String(next));
+      return { ...prev, favoritesOnly: next };
+    });
   }, []);
 
   const clearFilters = useCallback(() => {
+    localStorage.removeItem(FAVORITES_FILTER_KEY);
     setFilters((prev) => ({
       ...initialState,
       day: prev.day,
+      favoritesOnly: false,
     }));
   }, []);
 
