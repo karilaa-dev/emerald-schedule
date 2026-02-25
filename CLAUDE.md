@@ -112,9 +112,9 @@ For more information, read the Bun API docs in `node_modules/bun-types/docs/**.m
 
 ## Codebase Overview
 
-ECCC 2026 Schedule Viewer — a clean, fast replacement for the Emerald City Comic Con panels page. Bun server proxies the LeapEvent API (5-min cache), React 19 frontend renders a timeline with day tabs, search, category/tag/location filters, and localStorage-backed favorites.
+ECCC 2026 Schedule Viewer — a clean, fast replacement for the Emerald City Comic Con panels page. Bun server proxies the LeapEvent API (30-min cache), React 19 frontend renders a timeline with day tabs, search, category/tag/location filters, and localStorage-backed favorites. PWA with offline support, dark mode, hash-based polling, and auto-reconnect.
 
 **Stack**: Bun + React 19 + Tailwind CSS 4 (bun-plugin-tailwind)
-**Structure**: `server.tsx` (entry) / `src/` (App, hooks, lib, components) / `public/` (HTML shell)
+**Structure**: `server.tsx` (entry) / `src/` (App, hooks, lib, components) / `public/` (HTML shell, SW, PWA manifest)
 
 For detailed architecture, see [docs/CODEBASE_MAP.md](docs/CODEBASE_MAP.md).

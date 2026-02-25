@@ -4,8 +4,22 @@ import { fetchSchedules, fetchScheduleStatus, OfflineError } from "../lib/api.ts
 
 const CACHE_KEY = "eccc-schedule-cache";
 const POLL_INTERVAL = 15 * 60 * 1000; // 15 minutes
-const RATE_LIMIT = 4;
-const RATE_WINDOW = 60_000; // 1 minute
+const CHECK_RATE_LIMIT = 4;
+const CHECK_RATE_WINDOW = 15_000; // 15 seconds
+const FETCH_RATE_LIMIT = 4;
+const FETCH_RATE_WINDOW = 60_000; // 1 minute
+
+function makeRateLimiter(limit: number, window: number) {
+  const timestamps: number[] = [];
+  return {
+    limited() {
+      const now = Date.now();
+      while (timestamps.length && now - timestamps[0]! >= window) timestamps.shift();
+      return timestamps.length >= limit;
+    },
+    record() { timestamps.push(Date.now()); },
+  };
+}
 
 export function useSchedule() {
   const [events, setEvents] = useState<ScheduleEvent[]>([]);
@@ -15,19 +29,8 @@ export function useSchedule() {
   const [lastChecked, setLastChecked] = useState<number | null>(null);
   const [lastUpdated, setLastUpdated] = useState<number | null>(null);
   const hashRef = useRef<string | null>(null);
-  const checkTimestamps = useRef<number[]>([]);
-
-  const isRateLimited = () => {
-    const now = Date.now();
-    checkTimestamps.current = checkTimestamps.current.filter(
-      (t) => now - t < RATE_WINDOW,
-    );
-    return checkTimestamps.current.length >= RATE_LIMIT;
-  };
-
-  const recordCheck = () => {
-    checkTimestamps.current.push(Date.now());
-  };
+  const checkRate = useRef(makeRateLimiter(CHECK_RATE_LIMIT, CHECK_RATE_WINDOW));
+  const fetchRate = useRef(makeRateLimiter(FETCH_RATE_LIMIT, FETCH_RATE_WINDOW));
 
   const updateSchedule = useCallback(async () => {
     const now = Date.now();
@@ -42,15 +45,18 @@ export function useSchedule() {
 
   // Check for updates (only refetch if hash changed)
   const checkNow = useCallback(async () => {
-    if (isRateLimited()) return;
-    recordCheck();
+    if (checkRate.current.limited()) return;
+    checkRate.current.record();
     try {
       const status = await fetchScheduleStatus();
       const now = Date.now();
       setLastChecked(now);
       setIsStale(false);
       if (hashRef.current && status.hash !== hashRef.current) {
-        await updateSchedule();
+        if (!fetchRate.current.limited()) {
+          fetchRate.current.record();
+          await updateSchedule();
+        }
       }
       hashRef.current = status.hash;
     } catch (err) {
@@ -60,8 +66,8 @@ export function useSchedule() {
 
   // Force refetch regardless of hash
   const forceUpdate = useCallback(async () => {
-    if (isRateLimited()) return;
-    recordCheck();
+    if (fetchRate.current.limited()) return;
+    fetchRate.current.record();
     try {
       await updateSchedule();
       const status = await fetchScheduleStatus();
@@ -124,7 +130,21 @@ export function useSchedule() {
   useEffect(() => {
     const onReconnect = () => { checkNow(); };
     window.addEventListener("online", onReconnect);
-    return () => window.removeEventListener("online", onReconnect);
+
+    // Android: navigator.connection fires 'change' more reliably than online/offline
+    const conn = (navigator as any).connection;
+    const onConnectionChange = () => { if (navigator.onLine) checkNow(); };
+    conn?.addEventListener("change", onConnectionChange);
+
+    // Check when app returns to foreground (covers missed events while backgrounded)
+    const onVisible = () => { if (!document.hidden && navigator.onLine) checkNow(); };
+    document.addEventListener("visibilitychange", onVisible);
+
+    return () => {
+      window.removeEventListener("online", onReconnect);
+      conn?.removeEventListener("change", onConnectionChange);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, [checkNow]);
 
   return { events, loading, error, isStale, lastChecked, lastUpdated, checkNow, forceUpdate };
