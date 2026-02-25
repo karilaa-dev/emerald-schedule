@@ -55,7 +55,7 @@ export interface EventPerson {
   alt_name?: string;
 }
 
-export interface ScheduleApiResponse {
+interface ScheduleApiResponse {
   event_id: string;
   event_name: string;
   event_slug: string;

@@ -55,7 +55,7 @@ export function formatDayDate(dayKey: string): string {
 }
 
 /** Get the hour key for grouping: "2026-03-05 10:00:00" → "10" */
-export function getHourKey(timeStr: string): number {
+function getHourKey(timeStr: string): number {
   const date = parseTime(timeStr);
   return date.getHours();
 }
