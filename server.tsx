@@ -86,7 +86,7 @@ Bun.serve({
         const entry = await ensureCached("schedules");
         const clientHash = new URL(req.url).searchParams.get("hash");
         const changed = !clientHash || clientHash !== entry.hash;
-        const headers = { "Cache-Control": "no-store, no-cache, must-revalidate" };
+        const headers = { "Cache-Control": "public, max-age=60, s-maxage=60" };
 
         return Response.json(
           changed ? { changed: true, hash: entry.hash } : { changed: false },
