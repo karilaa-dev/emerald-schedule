@@ -13,6 +13,7 @@ import {
 import { useOnlineStatus } from "./hooks/useOnlineStatus.ts";
 import { useInstallPrompt } from "./hooks/useInstallPrompt.ts";
 import { useTheme } from "./hooks/useTheme.ts";
+import { useCompactMode } from "./hooks/useCompactMode.ts";
 import { DayTabs } from "./components/DayTabs.tsx";
 import { ThemeToggle } from "./components/ThemeToggle.tsx";
 import { SearchBar } from "./components/SearchBar.tsx";
@@ -30,6 +31,7 @@ export function App() {
   const isOnline = useOnlineStatus();
   const { visible: showInstallTip, install, dismiss: dismissInstallTip } = useInstallPrompt();
   const { theme, toggle: toggleTheme } = useTheme();
+  const { compact, toggle: toggleCompact } = useCompactMode();
   const { favorites, toggle: toggleFavorite } = useFavorites();
   const {
     filters,
@@ -163,7 +165,31 @@ export function App() {
             onToggleLocation={toggleLocation}
             onClear={clearFilters}
             hasActiveFilters={hasActiveFilters}
-            searchBar={<SearchBar value={filters.search} onChange={setSearch} />}
+            searchBar={
+              <div className="flex items-center gap-2">
+                <SearchBar value={filters.search} onChange={setSearch} />
+                <button
+                  className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-600 transition-all duration-200 ${
+                    compact
+                      ? "bg-accent-subtle text-accent"
+                      : "text-ink-muted hover:bg-surface-warm hover:text-ink"
+                  }`}
+                  onClick={toggleCompact}
+                  aria-label={compact ? "Expand cards" : "Compact cards"}
+                  title={compact ? "Expand cards" : "Compact cards"}
+                >
+                  {compact ? (
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                  ) : (
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+            }
             favoritesCount={dayFavoriteCount}
             favoritesOnly={filters.favoritesOnly}
             onToggleFavorites={toggleFavoritesOnly}
@@ -210,6 +236,7 @@ export function App() {
           events={filtered}
           favorites={favorites}
           allDays={filters.day === null}
+          compact={compact}
           onToggleFavorite={toggleFavorite}
           onSelectEvent={handleSelectEvent}
         />

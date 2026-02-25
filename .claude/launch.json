@@ -4,7 +4,7 @@
     {
       "name": "dev",
       "runtimeExecutable": "/Users/karilaa/.bun/bin/bun",
-      "runtimeArgs": ["run", "server.tsx"],
+      "runtimeArgs": ["run", "--hot", "server.tsx"],
       "port": 3000
     }
   ]

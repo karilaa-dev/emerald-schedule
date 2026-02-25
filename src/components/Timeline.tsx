@@ -6,6 +6,7 @@ interface Props {
   events: ScheduleEvent[];
   favorites: Set<number>;
   allDays?: boolean;
+  compact?: boolean;
   onToggleFavorite: (id: number) => void;
   onSelectEvent: (event: ScheduleEvent) => void;
 }
@@ -13,11 +14,13 @@ interface Props {
 function HourList({
   hours,
   favorites,
+  compact,
   onToggleFavorite,
   onSelectEvent,
 }: {
   hours: Map<number, ScheduleEvent[]>;
   favorites: Set<number>;
+  compact?: boolean;
   onToggleFavorite: (id: number) => void;
   onSelectEvent: (event: ScheduleEvent) => void;
 }) {
@@ -29,6 +32,7 @@ function HourList({
           hour={hour}
           events={hourEvents}
           favorites={favorites}
+          compact={compact}
           onToggleFavorite={onToggleFavorite}
           onSelectEvent={onSelectEvent}
         />
@@ -37,7 +41,7 @@ function HourList({
   );
 }
 
-export function Timeline({ events, favorites, allDays, onToggleFavorite, onSelectEvent }: Props) {
+export function Timeline({ events, favorites, allDays, compact, onToggleFavorite, onSelectEvent }: Props) {
   if (events.length === 0) return null;
 
   if (!allDays) {
@@ -45,6 +49,7 @@ export function Timeline({ events, favorites, allDays, onToggleFavorite, onSelec
       <HourList
         hours={groupByHour(events)}
         favorites={favorites}
+        compact={compact}
         onToggleFavorite={onToggleFavorite}
         onSelectEvent={onSelectEvent}
       />
@@ -63,6 +68,7 @@ export function Timeline({ events, favorites, allDays, onToggleFavorite, onSelec
           <HourList
             hours={hours}
             favorites={favorites}
+            compact={compact}
             onToggleFavorite={onToggleFavorite}
             onSelectEvent={onSelectEvent}
           />

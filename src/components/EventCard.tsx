@@ -6,11 +6,12 @@ import { decodeEntities } from "../lib/html.ts";
 interface Props {
   event: ScheduleEvent;
   isFavorite: boolean;
+  compact?: boolean;
   onToggleFavorite: (id: number) => void;
   onSelect: (event: ScheduleEvent) => void;
 }
 
-export function EventCard({ event, isFavorite, onToggleFavorite, onSelect }: Props) {
+export function EventCard({ event, isFavorite, compact, onToggleFavorite, onSelect }: Props) {
   const location = event.venue_location?.name ?? event.location;
 
   return (
@@ -50,13 +51,13 @@ export function EventCard({ event, isFavorite, onToggleFavorite, onSelect }: Pro
         )}
       </div>
 
-      {event.people_list && (
+      {!compact && event.people_list && (
         <p className="mt-1.5 text-[11px] text-ink-faint truncate italic">
           {event.people_list}
         </p>
       )}
 
-      {event.schedule_categories.length > 0 && (
+      {!compact && event.schedule_categories.length > 0 && (
         <div className="mt-2.5 flex flex-wrap gap-1">
           {event.schedule_categories.map((cat) => {
             const color = getCategoryColor(cat.name);

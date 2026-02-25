@@ -6,11 +6,12 @@ interface Props {
   hour: number;
   events: ScheduleEvent[];
   favorites: Set<number>;
+  compact?: boolean;
   onToggleFavorite: (id: number) => void;
   onSelectEvent: (event: ScheduleEvent) => void;
 }
 
-export function TimeSlot({ hour, events, favorites, onToggleFavorite, onSelectEvent }: Props) {
+export function TimeSlot({ hour, events, favorites, compact, onToggleFavorite, onSelectEvent }: Props) {
   return (
     <div className="flex gap-5 py-4" style={{ contentVisibility: "auto", containIntrinsicSize: "auto 200px" }}>
       <div className="w-16 shrink-0 pt-1">
@@ -28,6 +29,7 @@ export function TimeSlot({ hour, events, favorites, onToggleFavorite, onSelectEv
               key={event.id}
               event={event}
               isFavorite={favorites.has(event.id)}
+              compact={compact}
               onToggleFavorite={onToggleFavorite}
               onSelect={onSelectEvent}
             />
