@@ -7,6 +7,7 @@ interface Props {
   favorites: Set<number>;
   allDays?: boolean;
   compact?: boolean;
+  currentHour?: number | null;
   onToggleFavorite: (id: number) => void;
   onSelectEvent: (event: ScheduleEvent) => void;
 }
@@ -15,15 +16,25 @@ function HourList({
   hours,
   favorites,
   compact,
+  currentHour,
   onToggleFavorite,
   onSelectEvent,
 }: {
   hours: Map<number, ScheduleEvent[]>;
   favorites: Set<number>;
   compact?: boolean;
+  currentHour?: number | null;
   onToggleFavorite: (id: number) => void;
   onSelectEvent: (event: ScheduleEvent) => void;
 }) {
+  // Clamp currentHour to the available range: before first → first, after last → last
+  let clampedHour = currentHour;
+  if (clampedHour != null) {
+    const keys = [...hours.keys()];
+    if (clampedHour < keys[0]!) clampedHour = keys[0]!;
+    else if (clampedHour > keys[keys.length - 1]!) clampedHour = keys[keys.length - 1]!;
+  }
+
   return (
     <div className="divide-y divide-divider">
       {[...hours.entries()].map(([hour, hourEvents]) => (
@@ -33,6 +44,7 @@ function HourList({
           events={hourEvents}
           favorites={favorites}
           compact={compact}
+          isCurrent={clampedHour === hour}
           onToggleFavorite={onToggleFavorite}
           onSelectEvent={onSelectEvent}
         />
@@ -41,7 +53,7 @@ function HourList({
   );
 }
 
-export function Timeline({ events, favorites, allDays, compact, onToggleFavorite, onSelectEvent }: Props) {
+export function Timeline({ events, favorites, allDays, compact, currentHour, onToggleFavorite, onSelectEvent }: Props) {
   if (events.length === 0) return null;
 
   if (!allDays) {
@@ -50,6 +62,7 @@ export function Timeline({ events, favorites, allDays, compact, onToggleFavorite
         hours={groupByHour(events)}
         favorites={favorites}
         compact={compact}
+        currentHour={currentHour}
         onToggleFavorite={onToggleFavorite}
         onSelectEvent={onSelectEvent}
       />

@@ -14,6 +14,7 @@ import { useOnlineStatus } from "./hooks/useOnlineStatus.ts";
 import { useInstallPrompt } from "./hooks/useInstallPrompt.ts";
 import { useTheme } from "./hooks/useTheme.ts";
 import { useCompactMode } from "./hooks/useCompactMode.ts";
+import { useCurrentHour } from "./hooks/useCurrentHour.ts";
 import { DayTabs } from "./components/DayTabs.tsx";
 import { ThemeToggle } from "./components/ThemeToggle.tsx";
 import { SearchBar } from "./components/SearchBar.tsx";
@@ -44,6 +45,8 @@ export function App() {
     clearFilters,
     hasActiveFilters,
   } = useFilters();
+  const currentTime = useCurrentHour();
+  const [forceNow, setForceNow] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);
 
   const days = useMemo(() => getUniqueDays(events), [events]);
@@ -76,6 +79,10 @@ export function App() {
     () => filterEvents(events, filters, favorites),
     [events, filters, favorites],
   );
+
+  const activeCurrentHour = filters.day !== null && (forceNow || filters.day === currentTime.day)
+    ? currentTime.hour
+    : null;
 
   const dayFavoriteCount = useMemo(() => {
     if (!filters.day) return favorites.size;
@@ -188,6 +195,23 @@ export function App() {
                     </svg>
                   )}
                 </button>
+                {filters.day !== null && (
+                  <button
+                    className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-600 transition-all duration-200 ${
+                      forceNow || filters.day === currentTime.day
+                        ? "bg-accent-subtle text-accent"
+                        : "text-ink-muted hover:bg-surface-warm hover:text-ink"
+                    }`}
+                    onClick={() => setForceNow((f) => !f)}
+                    aria-label={forceNow ? "Disable now indicator" : "Show now indicator"}
+                    title={forceNow ? "Disable now indicator" : "Show now indicator"}
+                  >
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <circle cx="12" cy="12" r="10" strokeLinecap="round" strokeLinejoin="round" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
+                    </svg>
+                  </button>
+                )}
               </div>
             }
             favoritesCount={dayFavoriteCount}
@@ -237,6 +261,7 @@ export function App() {
           favorites={favorites}
           allDays={filters.day === null}
           compact={compact}
+          currentHour={activeCurrentHour}
           onToggleFavorite={toggleFavorite}
           onSelectEvent={handleSelectEvent}
         />
