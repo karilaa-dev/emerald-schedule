@@ -22,7 +22,7 @@ export function useSchedule() {
   const [deviceUpdatedAt, setDeviceUpdatedAt] = useState<number | null>(null);
   const hashRef = useRef<string | null>(null);
 
-  const updateSchedule = useCallback(async (hash: string) => {
+  const updateSchedule = useCallback(async (hash?: string) => {
     const data = await fetchSchedules(hash);
     setEvents(data.schedules);
     setIsStale(false);
@@ -68,28 +68,28 @@ export function useSchedule() {
     async function init() {
       try {
         const storedHash = localStorage.getItem(HASH_KEY);
-        const status = await fetchScheduleStatus(storedHash ?? undefined);
-        if (cancelled) return;
-        setLastChecked(Date.now());
+        const cached = localStorage.getItem(CACHE_KEY);
 
-        if (status.changed && status.hash) {
-          await updateSchedule(status.hash);
+        if (!storedHash || !cached) {
+          // First visit or no cache — fetch directly, skip status check
+          await updateSchedule();
+          if (cancelled) return;
+          setLastChecked(Date.now());
         } else {
-          const cached = localStorage.getItem(CACHE_KEY);
-          if (cached) {
+          // Returning user — check if data changed
+          const status = await fetchScheduleStatus(storedHash);
+          if (cancelled) return;
+          setLastChecked(Date.now());
+
+          if (status.changed && status.hash) {
+            await updateSchedule(status.hash);
+          } else {
             setEvents(JSON.parse(cached));
             hashRef.current = storedHash;
             const storedCachedAt = localStorage.getItem(CACHED_AT_KEY);
             if (storedCachedAt) setServerUpdatedAt(Number(storedCachedAt));
             const storedDeviceUpdated = localStorage.getItem(DEVICE_UPDATED_KEY);
             if (storedDeviceUpdated) setDeviceUpdatedAt(Number(storedDeviceUpdated));
-          } else {
-            // No localStorage but status said unchanged -- force fetch
-            const fresh = await fetchScheduleStatus();
-            if (cancelled) return;
-            if (fresh.hash) {
-              await updateSchedule(fresh.hash);
-            }
           }
         }
       } catch (err: unknown) {
