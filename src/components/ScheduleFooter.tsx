@@ -6,8 +6,11 @@ function timeAgo(timestamp: number): { text: string; isRecent: boolean } {
   const secs = Math.floor((Date.now() - timestamp) / 1000);
   if (secs < 60) return { text: `${secs}s ago`, isRecent: true };
   const mins = Math.floor(secs / 60);
-  if (mins === 1) return { text: "1 min ago", isRecent: false };
-  return { text: `${mins} min ago`, isRecent: false };
+  if (mins < 60) return { text: mins === 1 ? "1 min ago" : `${mins} min ago`, isRecent: false };
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return { text: hrs === 1 ? "1 hr ago" : `${hrs} hrs ago`, isRecent: false };
+  const days = Math.floor(hrs / 24);
+  return { text: days === 1 ? "1 day ago" : `${days} days ago`, isRecent: false };
 }
 
 export function ScheduleFooter({

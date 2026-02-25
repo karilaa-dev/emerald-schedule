@@ -21,25 +21,21 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 
-  // Status endpoint: network-only, never cached by SW
   if (url.pathname === "/api/schedules/status") {
     event.respondWith(networkOnly(event.request));
     return;
   }
 
-  // Schedule endpoint: network-first, clean old hash entries on cache put
   if (url.pathname === "/api/schedules") {
     event.respondWith(networkFirstSchedule(event.request));
     return;
   }
 
-  // Other API requests: network-first with cache fallback
   if (url.pathname.startsWith("/api/")) {
     event.respondWith(networkFirst(event.request));
     return;
   }
 
-  // Google Fonts: cache-first
   if (
     url.hostname === "fonts.googleapis.com" ||
     url.hostname === "fonts.gstatic.com"
@@ -48,15 +44,19 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Navigation requests (HTML shell): network-first
   if (event.request.mode === "navigate") {
     event.respondWith(networkFirst(event.request));
     return;
   }
 
-  // Static assets (JS, CSS, images): cache-first
   event.respondWith(cacheFirst(event.request));
 });
+
+function withOfflineHeader(cached) {
+  const headers = new Headers(cached.headers);
+  headers.set("X-SW-Cache", "1");
+  return new Response(cached.body, { status: cached.status, headers });
+}
 
 async function networkOnly(request) {
   try {
@@ -74,14 +74,13 @@ async function networkFirstSchedule(request) {
     const response = await fetch(request);
     const c = await caches.open(CACHE_NAME);
 
-    // Clean old /api/schedules entries before storing new one
+    // Remove stale schedule entries (different hash) before storing new one
     const keys = await c.keys();
-    for (const key of keys) {
-      const keyUrl = new URL(key.url);
-      if (keyUrl.pathname === "/api/schedules" && key.url !== request.url) {
-        await c.delete(key);
-      }
-    }
+    await Promise.all(
+      keys
+        .filter((k) => new URL(k.url).pathname === "/api/schedules" && k.url !== request.url)
+        .map((k) => c.delete(k))
+    );
 
     c.put(request, response.clone());
     return response;
@@ -92,11 +91,7 @@ async function networkFirstSchedule(request) {
     for (const key of keys) {
       if (new URL(key.url).pathname === "/api/schedules") {
         const cached = await c.match(key);
-        if (cached) {
-          const headers = new Headers(cached.headers);
-          headers.set("X-SW-Cache", "1");
-          return new Response(cached.body, { status: cached.status, headers });
-        }
+        if (cached) return withOfflineHeader(cached);
       }
     }
     return new Response("Offline", { status: 503 });
@@ -111,12 +106,7 @@ async function networkFirst(request) {
     return response;
   } catch {
     const cached = await caches.match(request);
-    if (cached) {
-      // Mark as served from SW cache so client knows it's offline
-      const headers = new Headers(cached.headers);
-      headers.set("X-SW-Cache", "1");
-      return new Response(cached.body, { status: cached.status, headers });
-    }
+    if (cached) return withOfflineHeader(cached);
     return new Response("Offline", { status: 503 });
   }
 }

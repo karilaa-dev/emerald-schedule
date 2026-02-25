@@ -25,15 +25,17 @@ function isRateLimited(ip: string): boolean {
   return false;
 }
 
-async function ensureCached(endpoint: string): Promise<void> {
+async function ensureCached(endpoint: string): Promise<CacheEntry> {
   const now = Date.now();
-  const cached = cache.get(endpoint);
-  if (cached && now - cached.timestamp < CACHE_TTL) return;
+  const existing = cache.get(endpoint);
+  if (existing && now - existing.timestamp < CACHE_TTL) return existing;
 
   const url = `${BASE_URL}/${endpoint}?key=${API_KEY}`;
   const upstream = await fetch(url);
   const data = await upstream.text();
-  cache.set(endpoint, { data, hash: Bun.hash(data).toString(36), timestamp: now });
+  const entry: CacheEntry = { data, hash: Bun.hash(data).toString(36), timestamp: now };
+  cache.set(endpoint, entry);
+  return entry;
 }
 
 const port = Number(process.env.PORT) || 3000;
@@ -71,31 +73,25 @@ Bun.serve({
     "/api/schedules": {
       async GET(req: Request) {
         const requestedHash = new URL(req.url).searchParams.get("hash");
-
-        await ensureCached("schedules");
-        const entry = cache.get("schedules")!;
+        const entry = await ensureCached("schedules");
 
         if (requestedHash && requestedHash !== entry.hash) {
           return Response.json(
             { error: "hash_mismatch", currentHash: entry.hash },
-            {
-              status: 404,
-              headers: { "Cache-Control": "no-store" },
-            },
+            { status: 404, headers: { "Cache-Control": "no-store" } },
           );
         }
 
-        const parsed = JSON.parse(entry.data);
-        const body = JSON.stringify({ ...parsed, hash: entry.hash, cachedAt: entry.timestamp });
-
-        return new Response(body, {
-          headers: {
-            "Content-Type": "application/json",
-            "Cache-Control": requestedHash
-              ? "public, max-age=300, s-maxage=86400"
-              : "public, max-age=60, s-maxage=300",
+        return Response.json(
+          { ...JSON.parse(entry.data), hash: entry.hash, cachedAt: entry.timestamp },
+          {
+            headers: {
+              "Cache-Control": requestedHash
+                ? "public, max-age=300, s-maxage=86400"
+                : "public, max-age=60, s-maxage=300",
+            },
           },
-        });
+        );
       },
     },
     "/api/schedules/status": {
@@ -105,29 +101,20 @@ Bun.serve({
           return new Response("Too Many Requests", { status: 429 });
         }
 
-        await ensureCached("schedules");
-        const entry = cache.get("schedules")!;
-
+        const entry = await ensureCached("schedules");
         const clientHash = new URL(req.url).searchParams.get("hash");
-        const headers = {
-          "Content-Type": "application/json",
-          "Cache-Control": "no-store, no-cache, must-revalidate",
-        };
+        const changed = !clientHash || clientHash !== entry.hash;
+        const headers = { "Cache-Control": "no-store, no-cache, must-revalidate" };
 
-        if (clientHash && clientHash === entry.hash) {
-          return new Response(JSON.stringify({ changed: false }), { headers });
-        }
-
-        return new Response(
-          JSON.stringify({ changed: true, hash: entry.hash }),
+        return Response.json(
+          changed ? { changed: true, hash: entry.hash } : { changed: false },
           { headers },
         );
       },
     },
     "/api/people": {
       async GET() {
-        await ensureCached("people?schedule=1");
-        const entry = cache.get("people?schedule=1")!;
+        const entry = await ensureCached("people?schedule=1");
         return new Response(entry.data, {
           headers: { "Content-Type": "application/json" },
         });
