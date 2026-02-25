@@ -31,7 +31,16 @@ Bun.serve({
   port,
   development: process.env.NODE_ENV !== "production",
   routes: {
-    "/": homepage,
+    "/": {
+      GET() {
+        return new Response(Bun.file("public/index.html"), {
+          headers: {
+            "Content-Type": "text/html; charset=utf-8",
+            "Cache-Control": "public, max-age=300, s-maxage=3600",
+          },
+        });
+      },
+    },
     "/sw.js": {
       GET() {
         return new Response(Bun.file("public/sw.js"), {
