@@ -120,5 +120,12 @@ export function useSchedule() {
     return () => clearInterval(id);
   }, [checkNow]);
 
+  // Auto-check for updates when network reconnects
+  useEffect(() => {
+    const onReconnect = () => { checkNow(); };
+    window.addEventListener("online", onReconnect);
+    return () => window.removeEventListener("online", onReconnect);
+  }, [checkNow]);
+
   return { events, loading, error, isStale, lastChecked, lastUpdated, checkNow, forceUpdate };
 }
