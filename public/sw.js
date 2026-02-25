@@ -1,4 +1,4 @@
-const CACHE_NAME = "eccc-v2";
+const CACHE_NAME = "eccc-v3";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -49,7 +49,8 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  event.respondWith(cacheFirst(event.request));
+  // CSS/JS assets — network-first to avoid stale bundles after code changes
+  event.respondWith(networkFirst(event.request));
 });
 
 function withOfflineHeader(cached) {

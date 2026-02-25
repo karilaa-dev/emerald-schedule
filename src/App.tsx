@@ -21,6 +21,7 @@ import { SearchBar } from "./components/SearchBar.tsx";
 import { FilterPanel } from "./components/FilterPanel.tsx";
 import { Timeline } from "./components/Timeline.tsx";
 const EventDetail = lazy(() => import("./components/EventDetail.tsx"));
+import { InfoModal } from "./components/InfoModal.tsx";
 import { FavoritesBar } from "./components/FavoritesBar.tsx";
 import { EmptyState } from "./components/EmptyState.tsx";
 import { OfflineBanner } from "./components/OfflineBanner.tsx";
@@ -48,6 +49,7 @@ export function App() {
   const currentTime = useCurrentHour();
   const [forceNow, setForceNow] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);
+  const [showInfo, setShowInfo] = useState(false);
 
   const days = useMemo(() => getUniqueDays(events), [events]);
   const categories = useMemo(() => getUniqueCategories(events), [events]);
@@ -146,7 +148,19 @@ export function App() {
                 Schedule
               </span>
             </div>
-            <ThemeToggle theme={theme} onToggle={toggleTheme} />
+            <div className="flex items-center gap-1">
+              <button
+                className="relative p-2 rounded-full text-ink-muted hover:text-ink hover:bg-surface-warm transition-colors duration-150"
+                onClick={() => setShowInfo(true)}
+                aria-label="About this app"
+                title="About this app"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </button>
+              <ThemeToggle theme={theme} onToggle={toggleTheme} />
+            </div>
           </div>
           <div className="pb-2 flex items-center gap-3 overflow-x-auto scrollbar-none">
             <DayTabs days={days} activeDay={filters.day} onSelectDay={setDay} />
@@ -285,6 +299,8 @@ export function App() {
           />
         </Suspense>
       )}
+
+      {showInfo && <InfoModal onClose={() => setShowInfo(false)} />}
     </div>
   );
 }
