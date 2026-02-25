@@ -23,7 +23,7 @@ export function EventCard({ event, isFavorite, compact, onToggleFavorite, onSele
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect(event); } }}
     >
       <button
-        className={`absolute top-2.5 right-2.5 flex items-center justify-center rounded-full p-1.5 transition-colors duration-150 ${
+        className={`absolute top-2.5 right-2.5 flex items-center justify-center rounded-full p-2 transition-colors duration-150 ${
           isFavorite
             ? "text-favorite"
             : "bg-surface-warm text-ink-faint hover:text-favorite"
@@ -35,16 +35,16 @@ export function EventCard({ event, isFavorite, compact, onToggleFavorite, onSele
         }}
         aria-label={isFavorite ? "Remove from saved" : "Save event"}
       >
-        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill={isFavorite ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill={isFavorite ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.562.562 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
         </svg>
       </button>
 
-      <h3 className="pr-6 font-display text-[13px] font-700 leading-snug text-ink">
+      <h3 className="pr-8 font-display text-sm font-700 leading-snug text-ink">
         {decodeEntities(event.title)}
       </h3>
 
-      <div className="mt-2 flex flex-col gap-0.5 text-xs text-ink-muted">
+      <div className="mt-0.5 flex flex-col text-[13px] text-ink-muted">
         <span className="font-500">{formatTimeRange(event.start_time, event.end_time)}</span>
         {location && (
           <span className="truncate text-ink-faint">{location}</span>
@@ -52,13 +52,13 @@ export function EventCard({ event, isFavorite, compact, onToggleFavorite, onSele
       </div>
 
       {!compact && event.people_list && (
-        <p className="mt-1.5 text-[11px] text-ink-faint truncate italic">
+        <p className="mt-0.5 text-[11px] text-ink-faint truncate italic">
           {event.people_list}
         </p>
       )}
 
       {!compact && event.schedule_categories.length > 0 && (
-        <div className="mt-2.5 flex flex-wrap gap-1">
+        <div className="mt-1 flex flex-wrap gap-1">
           {event.schedule_categories.map((cat) => {
             const color = getCategoryColor(cat.name);
             return (
