@@ -13,14 +13,27 @@ function timeAgo(timestamp: number): { text: string; isRecent: boolean } {
   return { text: days === 1 ? "1 day ago" : `${days} days ago`, isRecent: false };
 }
 
+function durationSince(timestamp: number): string {
+  const secs = Math.floor((Date.now() - timestamp) / 1000);
+  if (secs < 60) return `${secs}s`;
+  const mins = Math.floor(secs / 60);
+  if (mins < 60) return mins === 1 ? "1 min" : `${mins} min`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs === 1 ? "1 hr" : `${hrs} hrs`;
+  const days = Math.floor(hrs / 24);
+  return days === 1 ? "1 day" : `${days} days`;
+}
+
 export function ScheduleFooter({
   lastChecked,
-  lastUpdated,
+  serverUpdatedAt,
+  deviceUpdatedAt,
   onCheck,
   onForceUpdate,
 }: {
   lastChecked: number | null;
-  lastUpdated: number | null;
+  serverUpdatedAt: number | null;
+  deviceUpdatedAt: number | null;
   onCheck: () => void;
   onForceUpdate: () => void;
 }) {
@@ -37,7 +50,8 @@ export function ScheduleFooter({
       const now = Date.now();
       const hasRecent =
         (lastChecked && now - lastChecked < 60_000) ||
-        (lastUpdated && now - lastUpdated < 60_000);
+        (deviceUpdatedAt && now - deviceUpdatedAt < 60_000) ||
+        (serverUpdatedAt && now - serverUpdatedAt < 60_000);
 
       clearInterval(intervalRef.current);
       intervalRef.current = setInterval(
@@ -48,9 +62,9 @@ export function ScheduleFooter({
 
     update();
     return () => clearInterval(intervalRef.current);
-  }, [lastChecked, lastUpdated]);
+  }, [lastChecked, deviceUpdatedAt, serverUpdatedAt]);
 
-  if (!lastChecked && !lastUpdated) return null;
+  if (!lastChecked && !deviceUpdatedAt) return null;
 
   const startPress = () => {
     didLongPress.current = false;
@@ -68,7 +82,7 @@ export function ScheduleFooter({
   };
 
   const checked = lastChecked ? timeAgo(lastChecked) : null;
-  const updated = lastUpdated ? timeAgo(lastUpdated) : null;
+  const updated = deviceUpdatedAt ? timeAgo(deviceUpdatedAt) : null;
 
   return (
     <footer
@@ -81,6 +95,7 @@ export function ScheduleFooter({
     >
       {checked && <p>Checked {checked.text}</p>}
       {updated && <p>Updated {updated.text}</p>}
+      {serverUpdatedAt && <p>No schedule changes for {durationSince(serverUpdatedAt)}</p>}
     </footer>
   );
 }

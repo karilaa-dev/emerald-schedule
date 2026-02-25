@@ -5,26 +5,11 @@ import { fetchSchedules, fetchScheduleStatus, OfflineError } from "../lib/api.ts
 const CACHE_KEY = "eccc-schedule-cache";
 const HASH_KEY = "eccc-schedule-hash";
 const CACHED_AT_KEY = "eccc-schedule-cached-at";
+const DEVICE_UPDATED_KEY = "eccc-schedule-device-updated";
 const POLL_INTERVAL = 15 * 60 * 1000; // 15 minutes
-const CHECK_RATE_LIMIT = 4;
-const CHECK_RATE_WINDOW = 15_000; // 15 seconds
-const FETCH_RATE_LIMIT = 4;
-const FETCH_RATE_WINDOW = 60_000; // 1 minute
 
 function isNetworkError(err: unknown): boolean {
   return err instanceof OfflineError || err instanceof TypeError;
-}
-
-function makeRateLimiter(limit: number, window: number) {
-  const timestamps: number[] = [];
-  return {
-    limited() {
-      const now = Date.now();
-      while (timestamps.length && now - timestamps[0]! >= window) timestamps.shift();
-      return timestamps.length >= limit;
-    },
-    record() { timestamps.push(Date.now()); },
-  };
 }
 
 export function useSchedule() {
@@ -33,33 +18,32 @@ export function useSchedule() {
   const [error, setError] = useState<string | null>(null);
   const [isStale, setIsStale] = useState(false);
   const [lastChecked, setLastChecked] = useState<number | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<number | null>(null);
+  const [serverUpdatedAt, setServerUpdatedAt] = useState<number | null>(null);
+  const [deviceUpdatedAt, setDeviceUpdatedAt] = useState<number | null>(null);
   const hashRef = useRef<string | null>(null);
-  const checkRate = useRef(makeRateLimiter(CHECK_RATE_LIMIT, CHECK_RATE_WINDOW));
-  const fetchRate = useRef(makeRateLimiter(FETCH_RATE_LIMIT, FETCH_RATE_WINDOW));
 
   const updateSchedule = useCallback(async (hash: string) => {
     const data = await fetchSchedules(hash);
     setEvents(data.schedules);
     setIsStale(false);
-    setLastUpdated(data.cachedAt);
+    const now = Date.now();
+    setServerUpdatedAt(data.cachedAt);
+    setDeviceUpdatedAt(now);
     hashRef.current = data.hash;
     try {
       localStorage.setItem(CACHE_KEY, JSON.stringify(data.schedules));
       localStorage.setItem(HASH_KEY, data.hash);
       localStorage.setItem(CACHED_AT_KEY, String(data.cachedAt));
+      localStorage.setItem(DEVICE_UPDATED_KEY, String(now));
     } catch {}
   }, []);
 
   const checkNow = useCallback(async () => {
-    if (checkRate.current.limited()) return;
-    checkRate.current.record();
     try {
       const status = await fetchScheduleStatus(hashRef.current ?? undefined);
       setLastChecked(Date.now());
       setIsStale(false);
-      if (status.changed && status.hash && !fetchRate.current.limited()) {
-        fetchRate.current.record();
+      if (status.changed && status.hash) {
         await updateSchedule(status.hash);
       }
     } catch (err) {
@@ -68,8 +52,6 @@ export function useSchedule() {
   }, [updateSchedule]);
 
   const forceUpdate = useCallback(async () => {
-    if (fetchRate.current.limited()) return;
-    fetchRate.current.record();
     try {
       const status = await fetchScheduleStatus();
       if (status.hash) await updateSchedule(status.hash);
@@ -91,7 +73,6 @@ export function useSchedule() {
         setLastChecked(Date.now());
 
         if (status.changed && status.hash) {
-          fetchRate.current.record();
           await updateSchedule(status.hash);
         } else {
           const cached = localStorage.getItem(CACHE_KEY);
@@ -99,13 +80,14 @@ export function useSchedule() {
             setEvents(JSON.parse(cached));
             hashRef.current = storedHash;
             const storedCachedAt = localStorage.getItem(CACHED_AT_KEY);
-            if (storedCachedAt) setLastUpdated(Number(storedCachedAt));
+            if (storedCachedAt) setServerUpdatedAt(Number(storedCachedAt));
+            const storedDeviceUpdated = localStorage.getItem(DEVICE_UPDATED_KEY);
+            if (storedDeviceUpdated) setDeviceUpdatedAt(Number(storedDeviceUpdated));
           } else {
             // No localStorage but status said unchanged -- force fetch
             const fresh = await fetchScheduleStatus();
             if (cancelled) return;
             if (fresh.hash) {
-              fetchRate.current.record();
               await updateSchedule(fresh.hash);
             }
           }
@@ -118,7 +100,9 @@ export function useSchedule() {
             setEvents(JSON.parse(cached));
             hashRef.current = localStorage.getItem(HASH_KEY);
             const storedCachedAt = localStorage.getItem(CACHED_AT_KEY);
-            if (storedCachedAt) setLastUpdated(Number(storedCachedAt));
+            if (storedCachedAt) setServerUpdatedAt(Number(storedCachedAt));
+            const storedDeviceUpdated = localStorage.getItem(DEVICE_UPDATED_KEY);
+            if (storedDeviceUpdated) setDeviceUpdatedAt(Number(storedDeviceUpdated));
             if (isNetworkError(err)) setIsStale(true);
             return;
           }
@@ -156,5 +140,5 @@ export function useSchedule() {
     };
   }, [checkNow]);
 
-  return { events, loading, error, isStale, lastChecked, lastUpdated, checkNow, forceUpdate };
+  return { events, loading, error, isStale, lastChecked, serverUpdatedAt, deviceUpdatedAt, checkNow, forceUpdate };
 }

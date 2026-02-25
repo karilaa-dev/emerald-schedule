@@ -12,19 +12,6 @@ interface CacheEntry {
 
 const cache = new Map<string, CacheEntry>();
 
-const RATE_LIMIT = 4;
-const RATE_WINDOW = 60_000; // 1 minute
-const requestLog = new Map<string, number[]>();
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const timestamps = (requestLog.get(ip) ?? []).filter((t) => now - t < RATE_WINDOW);
-  requestLog.set(ip, timestamps);
-  if (timestamps.length >= RATE_LIMIT) return true;
-  timestamps.push(now);
-  return false;
-}
-
 async function ensureCached(endpoint: string): Promise<CacheEntry> {
   const now = Date.now();
   const existing = cache.get(endpoint);
@@ -96,11 +83,6 @@ Bun.serve({
     },
     "/api/schedules/status": {
       async GET(req: Request) {
-        const ip = req.headers.get("x-forwarded-for") ?? "unknown";
-        if (isRateLimited(ip)) {
-          return new Response("Too Many Requests", { status: 429 });
-        }
-
         const entry = await ensureCached("schedules");
         const clientHash = new URL(req.url).searchParams.get("hash");
         const changed = !clientHash || clientHash !== entry.hash;

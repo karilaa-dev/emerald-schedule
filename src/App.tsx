@@ -26,7 +26,7 @@ import { InstallTip } from "./components/InstallTip.tsx";
 import { ScheduleFooter } from "./components/ScheduleFooter.tsx";
 
 export function App() {
-  const { events, loading, error, isStale, lastChecked, lastUpdated, checkNow, forceUpdate } = useSchedule();
+  const { events, loading, error, isStale, lastChecked, serverUpdatedAt, deviceUpdatedAt, checkNow, forceUpdate } = useSchedule();
   const isOnline = useOnlineStatus();
   const { visible: showInstallTip, install, dismiss: dismissInstallTip } = useInstallPrompt();
   const { theme, toggle: toggleTheme } = useTheme();
@@ -215,7 +215,7 @@ export function App() {
         />
       </main>
 
-      <ScheduleFooter lastChecked={lastChecked} lastUpdated={lastUpdated} onCheck={checkNow} onForceUpdate={forceUpdate} />
+      <ScheduleFooter lastChecked={lastChecked} serverUpdatedAt={serverUpdatedAt} deviceUpdatedAt={deviceUpdatedAt} onCheck={checkNow} onForceUpdate={forceUpdate} />
 
       <FavoritesBar
         count={dayFavoriteCount}
