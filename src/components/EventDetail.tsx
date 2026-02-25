@@ -11,7 +11,7 @@ interface Props {
   onClose: () => void;
 }
 
-export function EventDetail({ event, isFavorite, onToggleFavorite, onClose }: Props) {
+export default function EventDetail({ event, isFavorite, onToggleFavorite, onClose }: Props) {
   const location = event.venue_location?.name ?? event.location;
 
   useEffect(() => {

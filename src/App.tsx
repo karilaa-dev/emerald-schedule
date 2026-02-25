@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, lazy, Suspense } from "react";
 import type { ScheduleEvent } from "./types.ts";
 import { useSchedule } from "./hooks/useSchedule.ts";
 import { useFavorites } from "./hooks/useFavorites.ts";
@@ -18,7 +18,7 @@ import { ThemeToggle } from "./components/ThemeToggle.tsx";
 import { SearchBar } from "./components/SearchBar.tsx";
 import { FilterPanel } from "./components/FilterPanel.tsx";
 import { Timeline } from "./components/Timeline.tsx";
-import { EventDetail } from "./components/EventDetail.tsx";
+const EventDetail = lazy(() => import("./components/EventDetail.tsx"));
 import { FavoritesBar } from "./components/FavoritesBar.tsx";
 import { EmptyState } from "./components/EmptyState.tsx";
 import { OfflineBanner } from "./components/OfflineBanner.tsx";
@@ -224,12 +224,14 @@ export function App() {
       />
 
       {selectedEvent && (
-        <EventDetail
-          event={selectedEvent}
-          isFavorite={favorites.has(selectedEvent.id)}
-          onToggleFavorite={toggleFavorite}
-          onClose={handleCloseDetail}
-        />
+        <Suspense fallback={null}>
+          <EventDetail
+            event={selectedEvent}
+            isFavorite={favorites.has(selectedEvent.id)}
+            onToggleFavorite={toggleFavorite}
+            onClose={handleCloseDetail}
+          />
+        </Suspense>
       )}
     </div>
   );

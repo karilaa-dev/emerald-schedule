@@ -74,7 +74,20 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Static shell for instant LCP — replaced by React on hydration -->
+      <div style="min-height:100vh;background:var(--color-surface,#f7f5f2)">
+        <header style="position:sticky;top:0;z-index:30;border-bottom:1px solid var(--color-border-light,#ece8e2);background:var(--color-surface-card,#fff)">
+          <div style="max-width:64rem;margin:0 auto;padding:0.75rem 1rem 0.5rem">
+            <div style="display:flex;align-items:baseline;gap:0.375rem">
+              <span style="font-family:'Outfit',sans-serif;font-size:1.25rem;font-weight:800;letter-spacing:-0.025em;color:var(--color-ink,#111)">ECCC</span>
+              <span style="font-family:'Outfit',sans-serif;font-size:1.25rem;font-weight:800;letter-spacing:-0.025em;color:var(--color-accent,#046a4e)">&rsquo;26</span>
+              <span style="font-family:'Outfit',sans-serif;font-size:1.25rem;font-weight:800;letter-spacing:-0.025em;color:var(--color-ink,#111)">Schedule</span>
+            </div>
+          </div>
+        </header>
+      </div>
+    </div>
     <script type="module" src="../src/index.tsx"></script>
   </body>
 </html>

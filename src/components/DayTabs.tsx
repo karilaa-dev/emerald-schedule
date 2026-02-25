@@ -7,7 +7,7 @@ interface Props {
 }
 
 function tabClass(isActive: boolean): string {
-  const base = "rounded-full px-3.5 py-1.5 font-display text-xs font-600 tracking-wide transition-all duration-200";
+  const base = "rounded-full px-3.5 py-1.5 font-display text-xs font-600 tracking-wide transition-colors duration-200";
   if (isActive) return `${base} bg-accent text-white shadow-sm`;
   return `${base} text-ink-muted hover:text-ink hover:bg-surface-warm`;
 }
