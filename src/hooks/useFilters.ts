@@ -3,6 +3,7 @@ import type { FilterState } from "../types.ts";
 
 const DAY_KEY = "eccc-selected-day";
 const FAVORITES_FILTER_KEY = "eccc-favorites-only";
+const MY_SCHEDULE_VIEW_KEY = "eccc-my-schedule-view";
 
 function getStoredDay(): string | null {
   const v = localStorage.getItem(DAY_KEY);
@@ -16,6 +17,7 @@ const initialState: FilterState = {
   locations: new Set(),
   search: "",
   favoritesOnly: localStorage.getItem(FAVORITES_FILTER_KEY) === "true",
+  myScheduleView: localStorage.getItem(MY_SCHEDULE_VIEW_KEY) === "true",
 };
 
 type SetField = "categories" | "tags" | "locations";
@@ -53,12 +55,21 @@ export function useFilters() {
     });
   }, []);
 
+  const toggleMyScheduleView = useCallback(() => {
+    setFilters((prev) => {
+      const next = !prev.myScheduleView;
+      localStorage.setItem(MY_SCHEDULE_VIEW_KEY, String(next));
+      return { ...prev, myScheduleView: next };
+    });
+  }, []);
+
   const clearFilters = useCallback(() => {
     localStorage.removeItem(FAVORITES_FILTER_KEY);
     setFilters((prev) => ({
       ...initialState,
       day: prev.day,
       favoritesOnly: false,
+      myScheduleView: prev.myScheduleView,
     }));
   }, []);
 
@@ -77,6 +88,7 @@ export function useFilters() {
     toggleLocation,
     setSearch,
     toggleFavoritesOnly,
+    toggleMyScheduleView,
     clearFilters,
     hasActiveFilters,
   };

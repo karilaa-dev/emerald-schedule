@@ -5,8 +5,11 @@ export function filterEvents(
   events: ScheduleEvent[],
   filters: FilterState,
   favorites: Set<number>,
+  scheduled: Set<number>,
 ): ScheduleEvent[] {
   return events.filter((event) => {
+    if (filters.myScheduleView && !scheduled.has(event.id)) return false;
+
     if (filters.day && getDayKey(event.start_time) !== filters.day) return false;
 
     if (filters.categories.size > 0) {

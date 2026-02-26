@@ -74,4 +74,5 @@ export interface FilterState {
   locations: Set<string>;
   search: string;
   favoritesOnly: boolean;
+  myScheduleView: boolean;
 }

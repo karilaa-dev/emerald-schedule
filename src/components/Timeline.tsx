@@ -4,27 +4,27 @@ import { TimeSlot } from "./TimeSlot.tsx";
 
 interface Props {
   events: ScheduleEvent[];
-  favorites: Set<number>;
+  scheduled: Set<number>;
   allDays?: boolean;
   compact?: boolean;
   currentHour?: number | null;
-  onToggleFavorite: (id: number) => void;
+  onToggleSchedule: (id: number) => void;
   onSelectEvent: (event: ScheduleEvent) => void;
 }
 
 function HourList({
   hours,
-  favorites,
+  scheduled,
   compact,
   currentHour,
-  onToggleFavorite,
+  onToggleSchedule,
   onSelectEvent,
 }: {
   hours: Map<number, ScheduleEvent[]>;
-  favorites: Set<number>;
+  scheduled: Set<number>;
   compact?: boolean;
   currentHour?: number | null;
-  onToggleFavorite: (id: number) => void;
+  onToggleSchedule: (id: number) => void;
   onSelectEvent: (event: ScheduleEvent) => void;
 }) {
   // Clamp currentHour to the available range: before first → first, after last → last
@@ -42,10 +42,10 @@ function HourList({
           key={hour}
           hour={hour}
           events={hourEvents}
-          favorites={favorites}
+          scheduled={scheduled}
           compact={compact}
           isCurrent={clampedHour === hour}
-          onToggleFavorite={onToggleFavorite}
+          onToggleSchedule={onToggleSchedule}
           onSelectEvent={onSelectEvent}
         />
       ))}
@@ -53,17 +53,17 @@ function HourList({
   );
 }
 
-export function Timeline({ events, favorites, allDays, compact, currentHour, onToggleFavorite, onSelectEvent }: Props) {
+export function Timeline({ events, scheduled, allDays, compact, currentHour, onToggleSchedule, onSelectEvent }: Props) {
   if (events.length === 0) return null;
 
   if (!allDays) {
     return (
       <HourList
         hours={groupByHour(events)}
-        favorites={favorites}
+        scheduled={scheduled}
         compact={compact}
         currentHour={currentHour}
-        onToggleFavorite={onToggleFavorite}
+        onToggleSchedule={onToggleSchedule}
         onSelectEvent={onSelectEvent}
       />
     );
@@ -75,9 +75,9 @@ export function Timeline({ events, favorites, allDays, compact, currentHour, onT
         <section key={day}>
           <HourList
             hours={hours}
-            favorites={favorites}
+            scheduled={scheduled}
             compact={compact}
-            onToggleFavorite={onToggleFavorite}
+            onToggleSchedule={onToggleSchedule}
             onSelectEvent={onSelectEvent}
           />
         </section>

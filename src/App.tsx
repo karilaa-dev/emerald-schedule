@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useCallback, lazy, Suspense } from "react
 import type { ScheduleEvent } from "./types.ts";
 import { useSchedule } from "./hooks/useSchedule.ts";
 import { useFavorites } from "./hooks/useFavorites.ts";
+import { useMySchedule } from "./hooks/useMySchedule.ts";
 import { useFilters } from "./hooks/useFilters.ts";
 import { getUniqueDays, getDayKey, formatDayShort, formatDayDate } from "./lib/dates.ts";
 import {
@@ -35,6 +36,7 @@ export function App() {
   const { theme, toggle: toggleTheme } = useTheme();
   const { compact, toggle: toggleCompact } = useCompactMode();
   const { favorites, toggle: toggleFavorite } = useFavorites();
+  const { scheduled, toggle: toggleSchedule } = useMySchedule();
   const {
     filters,
     setDay,
@@ -43,6 +45,7 @@ export function App() {
     toggleLocation,
     setSearch,
     toggleFavoritesOnly,
+    toggleMyScheduleView,
     clearFilters,
     hasActiveFilters,
   } = useFilters();
@@ -78,18 +81,35 @@ export function App() {
   }, [days, setDay]);
 
   const filtered = useMemo(
-    () => filterEvents(events, filters, favorites),
-    [events, filters, favorites],
+    () => filterEvents(events, filters, favorites, scheduled),
+    [events, filters, favorites, scheduled],
   );
 
   const activeCurrentHour = filters.day !== null && (forceNow || filters.day === currentTime.day)
     ? currentTime.hour
     : null;
 
-  const dayFavoriteCount = useMemo(() => {
-    if (!filters.day) return favorites.size;
-    return events.filter((e) => favorites.has(e.id) && getDayKey(e.start_time) === filters.day).length;
-  }, [events, favorites, filters.day]);
+  // Days that have at least one scheduled event (for My Schedule view)
+  const scheduledDays = useMemo(() => {
+    if (!filters.myScheduleView) return null;
+    const daySet = new Set<string>();
+    for (const event of events) {
+      if (scheduled.has(event.id)) {
+        daySet.add(getDayKey(event.start_time));
+      }
+    }
+    return [...daySet].sort();
+  }, [events, scheduled, filters.myScheduleView]);
+
+  const effectiveDays = scheduledDays ?? days;
+
+  // Auto-correct selected day when entering My Schedule if current day has no scheduled events
+  useEffect(() => {
+    if (!filters.myScheduleView || !scheduledDays) return;
+    if (filters.day !== null && !scheduledDays.includes(filters.day)) {
+      setDay(scheduledDays.length > 0 ? scheduledDays[0]! : null);
+    }
+  }, [filters.myScheduleView, scheduledDays, filters.day, setDay]);
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -138,15 +158,18 @@ export function App() {
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="flex items-center justify-between gap-4 py-3">
             <div className="flex items-baseline gap-1.5 shrink-0">
-              <h1 className="font-display text-xl font-800 tracking-tight text-ink">
-                ECCC
-              </h1>
-              <span className="font-display text-xl font-800 tracking-tight text-accent">
-                '26
-              </span>
-              <span className="font-display text-xl font-800 tracking-tight text-ink">
-                Schedule
-              </span>
+              {filters.myScheduleView ? (
+                <>
+                  <h1 className="font-display text-xl font-800 tracking-tight text-ink">My</h1>
+                  <span className="font-display text-xl font-800 tracking-tight text-accent">Schedule</span>
+                </>
+              ) : (
+                <>
+                  <h1 className="font-display text-xl font-800 tracking-tight text-ink">ECCC</h1>
+                  <span className="font-display text-xl font-800 tracking-tight text-accent">'26</span>
+                  <span className="font-display text-xl font-800 tracking-tight text-ink">Schedule</span>
+                </>
+              )}
             </div>
             <div className="flex items-center gap-1">
               <button
@@ -163,7 +186,7 @@ export function App() {
             </div>
           </div>
           <div className="pb-2 flex items-center gap-3 overflow-x-auto scrollbar-none">
-            <DayTabs days={days} activeDay={filters.day} onSelectDay={setDay} />
+            <DayTabs days={effectiveDays} activeDay={filters.day} onSelectDay={setDay} />
           </div>
         </div>
       </header>
@@ -228,7 +251,7 @@ export function App() {
                 )}
               </div>
             }
-            favoritesCount={dayFavoriteCount}
+            favoritesCount={favorites.size}
             favoritesOnly={filters.favoritesOnly}
             onToggleFavorites={toggleFavoritesOnly}
           />
@@ -256,7 +279,7 @@ export function App() {
         )}
 
         {!loading && filtered.length === 0 && (
-          <EmptyState hasFilters={hasActiveFilters} onClear={clearFilters} />
+          <EmptyState hasFilters={hasActiveFilters} isMySchedule={filters.myScheduleView} onClear={clearFilters} />
         )}
 
         {!loading && filtered.length > 0 && (
@@ -272,11 +295,11 @@ export function App() {
 
         <Timeline
           events={filtered}
-          favorites={favorites}
+          scheduled={scheduled}
           allDays={filters.day === null}
           compact={compact}
           currentHour={activeCurrentHour}
-          onToggleFavorite={toggleFavorite}
+          onToggleSchedule={toggleSchedule}
           onSelectEvent={handleSelectEvent}
         />
       </main>
@@ -284,9 +307,9 @@ export function App() {
       <ScheduleFooter lastChecked={lastChecked} serverUpdatedAt={serverUpdatedAt} deviceUpdatedAt={deviceUpdatedAt} onCheck={checkNow} onForceUpdate={forceUpdate} />
 
       <FavoritesBar
-        count={dayFavoriteCount}
-        favoritesOnly={filters.favoritesOnly}
-        onToggle={toggleFavoritesOnly}
+        count={scheduled.size}
+        favoritesOnly={filters.myScheduleView}
+        onToggle={toggleMyScheduleView}
       />
 
       {selectedEvent && (
@@ -294,7 +317,9 @@ export function App() {
           <EventDetail
             event={selectedEvent}
             isFavorite={favorites.has(selectedEvent.id)}
+            isScheduled={scheduled.has(selectedEvent.id)}
             onToggleFavorite={toggleFavorite}
+            onToggleSchedule={toggleSchedule}
             onClose={handleCloseDetail}
           />
         </Suspense>

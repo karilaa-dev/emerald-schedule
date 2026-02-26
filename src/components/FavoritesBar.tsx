@@ -11,15 +11,18 @@ export function FavoritesBar({ count, favoritesOnly, onToggle }: Props) {
     <button
       className={`fixed bottom-5 right-5 z-40 flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-600 shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 ${
         favoritesOnly
-          ? "bg-favorite text-white"
+          ? "bg-accent text-white"
           : "bg-surface-card text-ink border border-border shadow-lg"
       }`}
       onClick={onToggle}
     >
-      <svg className="h-4 w-4" viewBox="0 0 24 24" fill={favoritesOnly ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.562.562 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2" fill={favoritesOnly ? "currentColor" : "none"} />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" stroke={favoritesOnly ? "rgba(255,255,255,0.5)" : "currentColor"} />
       </svg>
-      {favoritesOnly ? "Showing saved" : `${count} saved`}
+      {favoritesOnly ? "My Schedule" : `My Schedule (${count})`}
     </button>
   );
 }

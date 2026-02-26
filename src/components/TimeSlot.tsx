@@ -6,14 +6,14 @@ import { EventCard } from "./EventCard.tsx";
 interface Props {
   hour: number;
   events: ScheduleEvent[];
-  favorites: Set<number>;
+  scheduled: Set<number>;
   compact?: boolean;
   isCurrent?: boolean;
-  onToggleFavorite: (id: number) => void;
+  onToggleSchedule: (id: number) => void;
   onSelectEvent: (event: ScheduleEvent) => void;
 }
 
-export function TimeSlot({ hour, events, favorites, compact, isCurrent, onToggleFavorite, onSelectEvent }: Props) {
+export function TimeSlot({ hour, events, scheduled, compact, isCurrent, onToggleSchedule, onSelectEvent }: Props) {
   const dividerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -52,9 +52,9 @@ export function TimeSlot({ hour, events, favorites, compact, isCurrent, onToggle
           <EventCard
             key={event.id}
             event={event}
-            isFavorite={favorites.has(event.id)}
+            isScheduled={scheduled.has(event.id)}
             compact={compact}
-            onToggleFavorite={onToggleFavorite}
+            onToggleSchedule={onToggleSchedule}
             onSelect={onSelectEvent}
           />
         ))}

@@ -7,11 +7,13 @@ import { decodeEntities, linkifyHtml } from "../lib/html.ts";
 interface Props {
   event: ScheduleEvent;
   isFavorite: boolean;
+  isScheduled: boolean;
   onToggleFavorite: (id: number) => void;
+  onToggleSchedule: (id: number) => void;
   onClose: () => void;
 }
 
-export default function EventDetail({ event, isFavorite, onToggleFavorite, onClose }: Props) {
+export default function EventDetail({ event, isFavorite, isScheduled, onToggleFavorite, onToggleSchedule, onClose }: Props) {
   const location = event.venue_location?.name ?? event.location;
 
   useEffect(() => {
@@ -94,6 +96,28 @@ export default function EventDetail({ event, isFavorite, onToggleFavorite, onClo
               </div>
             )}
           </div>
+
+          {/* Add to schedule */}
+          <button
+            className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-600 transition-all duration-150 ${
+              isScheduled
+                ? "text-accent"
+                : "bg-surface-warm text-ink-muted hover:text-accent"
+            }`}
+            style={isScheduled ? { backgroundColor: "var(--color-accent-subtle)" } : undefined}
+            onClick={() => onToggleSchedule(event.id)}
+          >
+            <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" fill={isScheduled ? "currentColor" : "none"} />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" stroke={isScheduled ? "var(--color-accent-subtle, white)" : "currentColor"} />
+              {isScheduled && (
+                <polyline points="9 15 11 17 15 13" stroke="var(--color-accent-subtle, white)" strokeWidth={2.5} fill="none" />
+              )}
+            </svg>
+            {isScheduled ? "In My Schedule" : "Add to My Schedule"}
+          </button>
 
           {/* Categories */}
           {event.schedule_categories.length > 0 && (
