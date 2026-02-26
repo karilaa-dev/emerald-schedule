@@ -119,35 +119,37 @@ export default function EventDetail({ event, isFavorite, isScheduled, onToggleFa
             {isScheduled ? "In My Schedule" : "Add to My Schedule"}
           </button>
 
-          {/* Categories */}
-          {event.schedule_categories.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {event.schedule_categories.map((cat) => {
-                const color = getCategoryColor(cat.name);
-                return (
-                  <span
-                    key={cat.id}
-                    className="rounded-full px-2.5 py-0.5 text-xs font-600"
-                    style={{ backgroundColor: color.bg, color: color.text }}
-                  >
-                    {cat.name}
-                  </span>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Tags */}
-          {event.schedule_tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {event.schedule_tags.map((tag) => (
-                <span
-                  key={tag.id}
-                  className="rounded-full border border-border px-2.5 py-0.5 text-xs text-ink-muted font-500"
-                >
-                  {tag.tag}
-                </span>
-              ))}
+          {/* Categories & Tags */}
+          {(event.schedule_categories.length > 0 || event.schedule_tags.length > 0) && (
+            <div className="space-y-1.5">
+              {event.schedule_categories.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {event.schedule_categories.map((cat) => {
+                    const color = getCategoryColor(cat.name);
+                    return (
+                      <span
+                        key={cat.id}
+                        className="rounded-full px-2.5 py-0.5 text-xs font-600"
+                        style={{ backgroundColor: color.bg, color: color.text }}
+                      >
+                        {cat.name}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+              {event.schedule_tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {event.schedule_tags.map((tag) => (
+                    <span
+                      key={tag.id}
+                      className="rounded-full border border-border px-2.5 py-0.5 text-xs text-ink-muted font-500"
+                    >
+                      {tag.tag}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

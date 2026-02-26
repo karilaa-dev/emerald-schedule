@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useState, useRef, useEffect, type ReactNode } from "react";
 
 interface Props {
   categories: string[];
@@ -12,7 +12,9 @@ interface Props {
   onToggleLocation: (loc: string) => void;
   onClear: () => void;
   hasActiveFilters: boolean;
-  searchBar?: ReactNode;
+  search: string;
+  onSearchChange: (value: string) => void;
+  toolbarButtons?: ReactNode;
   favoritesCount: number;
   favoritesOnly: boolean;
   onToggleFavorites: () => void;
@@ -87,26 +89,34 @@ export function FilterPanel({
   onToggleLocation,
   onClear,
   hasActiveFilters,
-  searchBar,
+  search,
+  onSearchChange,
+  toolbarButtons,
   favoritesCount,
   favoritesOnly,
   onToggleFavorites,
 }: Props) {
   const [open, setOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const count = activeCategories.size + activeTags.size + activeLocations.size;
+
+  useEffect(() => {
+    if (searchOpen) searchInputRef.current?.focus();
+  }, [searchOpen]);
 
   return (
     <div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1.5">
         <button
-          className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-600 transition-all duration-200 ${
+          className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-600 transition-all duration-200 ${
             open || hasActiveFilters
               ? "bg-accent-subtle text-accent"
               : "text-ink-muted hover:bg-surface-warm hover:text-ink"
           }`}
           onClick={() => setOpen(!open)}
         >
-          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
           </svg>
           Filters
@@ -116,16 +126,84 @@ export function FilterPanel({
             </span>
           )}
         </button>
+        <button
+          className={`grid place-items-center rounded-full p-2 transition-all duration-200 ${
+            favoritesOnly
+              ? "text-favorite"
+              : "text-ink-muted hover:bg-surface-warm hover:text-ink"
+          }`}
+          style={favoritesOnly ? { backgroundColor: "var(--color-favorite-subtle)" } : undefined}
+          onClick={onToggleFavorites}
+          aria-label={favoritesOnly ? "Show all events" : "Show saved only"}
+          title={favoritesOnly ? "Show all events" : "Show saved only"}
+        >
+          <svg className="h-4 w-4" viewBox="0 0 24 24" fill={favoritesOnly ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.562.562 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+          </svg>
+        </button>
+        <button
+          className={`grid place-items-center rounded-full p-2 transition-all duration-200 ${
+            searchOpen || search
+              ? "bg-accent-subtle text-accent"
+              : "text-ink-muted hover:bg-surface-warm hover:text-ink"
+          }`}
+          onClick={() => setSearchOpen(!searchOpen)}
+          aria-label="Search events"
+          title="Search events"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
         {hasActiveFilters && (
           <button
-            className="text-xs font-500 text-ink-faint hover:text-ink transition-colors"
+            className="text-xs font-500 text-ink-faint hover:text-ink transition-colors px-1"
             onClick={onClear}
           >
-            Clear all
+            Clear
           </button>
         )}
-        {searchBar && <div className="flex-1 max-w-xs">{searchBar}</div>}
+        <div className="flex-1" />
+        {toolbarButtons}
       </div>
+
+      {searchOpen && (
+        <div className="mt-2 flex items-center gap-2">
+          <div className="relative group flex-1">
+            <svg
+              className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-ink-faint transition-colors group-focus-within:text-accent"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              ref={searchInputRef}
+              type="text"
+              placeholder="Search events..."
+              className="w-full rounded-full border border-border bg-surface py-2 pl-9 pr-8 text-sm text-ink placeholder-ink-faint outline-none transition-all focus:border-accent focus:ring-2 focus:ring-accent/10 focus:bg-surface-card"
+              value={search}
+              onChange={(e) => onSearchChange(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  onSearchChange("");
+                  setSearchOpen(false);
+                }
+              }}
+            />
+            {search && (
+              <button
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full h-5 w-5 flex items-center justify-center bg-ink-faint/20 text-ink-muted hover:bg-ink-faint/40 transition-colors text-xs leading-none"
+                onClick={() => onSearchChange("")}
+              >
+                &times;
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {open && (
         <div className="mt-3 space-y-5 rounded-xl border border-border-light bg-surface-card p-5 shadow-sm">

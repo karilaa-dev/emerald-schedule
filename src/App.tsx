@@ -18,7 +18,6 @@ import { useCompactMode } from "./hooks/useCompactMode.ts";
 import { useCurrentHour } from "./hooks/useCurrentHour.ts";
 import { DayTabs } from "./components/DayTabs.tsx";
 import { ThemeToggle } from "./components/ThemeToggle.tsx";
-import { SearchBar } from "./components/SearchBar.tsx";
 import { FilterPanel } from "./components/FilterPanel.tsx";
 import { Timeline } from "./components/Timeline.tsx";
 const EventDetail = lazy(() => import("./components/EventDetail.tsx"));
@@ -209,11 +208,12 @@ export function App() {
             onToggleLocation={toggleLocation}
             onClear={clearFilters}
             hasActiveFilters={hasActiveFilters}
-            searchBar={
-              <div className="flex items-center gap-2">
-                <SearchBar value={filters.search} onChange={setSearch} />
+            search={filters.search}
+            onSearchChange={setSearch}
+            toolbarButtons={
+              <div className="flex items-center gap-1">
                 <button
-                  className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-600 transition-all duration-200 ${
+                  className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-600 transition-all duration-200 ${
                     compact
                       ? "bg-accent-subtle text-accent"
                       : "text-ink-muted hover:bg-surface-warm hover:text-ink"
@@ -223,18 +223,19 @@ export function App() {
                   title={compact ? "Expand cards" : "Compact cards"}
                 >
                   {compact ? (
-                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                   ) : (
-                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                     </svg>
                   )}
+                  {compact ? "Compact" : "Default"}
                 </button>
                 {filters.day !== null && (
                   <button
-                    className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-600 transition-all duration-200 ${
+                    className={`grid place-items-center rounded-full p-2 transition-all duration-200 ${
                       forceNow || filters.day === currentTime.day
                         ? "bg-accent-subtle text-accent"
                         : "text-ink-muted hover:bg-surface-warm hover:text-ink"
@@ -243,7 +244,7 @@ export function App() {
                     aria-label={forceNow ? "Disable now indicator" : "Show now indicator"}
                     title={forceNow ? "Disable now indicator" : "Show now indicator"}
                   >
-                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <circle cx="12" cy="12" r="10" strokeLinecap="round" strokeLinejoin="round" />
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
                     </svg>
