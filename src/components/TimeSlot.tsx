@@ -22,7 +22,7 @@ export function TimeSlot({ hour, events, scheduled, compact, isCurrent, onToggle
     }
   }, [isCurrent]);
 
-  const baseDivider = "sticky top-[5.5rem] -mx-4 px-4 sm:-mx-6 sm:px-6 py-1.5 backdrop-blur-sm border-b";
+  const baseDivider = "sticky top-0 -mx-4 px-4 sm:-mx-6 sm:px-6 py-1.5 backdrop-blur-sm border-b";
   const dividerClass = isCurrent
     ? `${baseDivider} bg-accent-subtle`
     : `${baseDivider} bg-surface/95 border-border-light`;
@@ -32,8 +32,8 @@ export function TimeSlot({ hour, events, scheduled, compact, isCurrent, onToggle
     : "font-display text-xs font-700 text-ink-faint tracking-wide";
 
   const dividerStyle: React.CSSProperties = isCurrent
-    ? { zIndex: 5, scrollMarginTop: "5.5rem", borderBottomColor: "var(--color-accent)", borderBottomWidth: 2 }
-    : { zIndex: 5, scrollMarginTop: "5.5rem" };
+    ? { zIndex: 5, scrollMarginTop: "0", borderBottomColor: "var(--color-accent)", borderBottomWidth: 2 }
+    : { zIndex: 5, scrollMarginTop: "0" };
 
   return (
     <div className={compact ? "pb-2" : "pb-4"}>

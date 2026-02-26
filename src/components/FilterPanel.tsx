@@ -30,11 +30,40 @@ function chipClass(isActive: boolean): string {
   return isActive ? CHIP_ACTIVE : CHIP_INACTIVE;
 }
 
-function SectionHeading({ children }: { children: string }) {
+function CollapsibleSection({
+  title,
+  activeCount,
+  children,
+}: {
+  title: string;
+  activeCount?: number;
+  children: ReactNode;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
   return (
-    <h4 className="font-display text-[10px] font-700 text-ink-faint uppercase tracking-[0.15em] mb-2">
-      {children}
-    </h4>
+    <div>
+      <button
+        className="flex w-full items-center justify-between gap-2 group"
+        onClick={() => setExpanded(!expanded)}
+      >
+        <span className="font-display text-[10px] font-700 text-ink-faint uppercase tracking-[0.15em] group-hover:text-ink-muted transition-colors">
+          {title}
+          {activeCount ? (
+            <span className="ml-1.5 rounded-full bg-accent text-white text-[9px] font-700 px-1.5 py-0.5 leading-none">
+              {activeCount}
+            </span>
+          ) : null}
+        </span>
+        <svg
+          className={`h-3 w-3 text-ink-faint shrink-0 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {expanded && <div className="mt-2">{children}</div>}
+    </div>
   );
 }
 
@@ -54,8 +83,7 @@ function FilterSection({
   const hasMore = items.length > 6;
 
   return (
-    <div>
-      <SectionHeading>{title}</SectionHeading>
+    <CollapsibleSection title={title} activeCount={active.size}>
       <div className="flex flex-wrap gap-1.5">
         {shown.map((item) => (
           <button
@@ -75,7 +103,7 @@ function FilterSection({
           </button>
         )}
       </div>
-    </div>
+    </CollapsibleSection>
   );
 }
 
@@ -113,7 +141,7 @@ export function FilterPanel({
     <div>
       <div className="flex items-center gap-1.5">
         <button
-          className={`grid place-items-center rounded-full p-2 transition-all duration-200 ${
+          className={`grid place-items-center rounded-full p-1.5 transition-all duration-200 ${
             favoritesOnly
               ? "text-favorite"
               : "text-ink-muted hover:bg-surface-warm hover:text-ink"
@@ -128,7 +156,7 @@ export function FilterPanel({
           </svg>
         </button>
         <button
-          className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-600 transition-all duration-200 ${
+          className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-600 transition-all duration-200 ${
             open || hasActiveFilters
               ? "bg-accent-subtle text-accent"
               : "text-ink-muted hover:bg-surface-warm hover:text-ink"
@@ -146,7 +174,7 @@ export function FilterPanel({
           )}
         </button>
         <button
-          className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-600 transition-all duration-200 ${
+          className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-600 transition-all duration-200 ${
             myScheduleView
               ? "bg-accent-subtle text-accent"
               : "text-ink-muted hover:bg-surface-warm hover:text-ink"
@@ -163,7 +191,7 @@ export function FilterPanel({
           My Schedule
         </button>
         <button
-          className={`grid place-items-center rounded-full p-2 transition-all duration-200 ${
+          className={`grid place-items-center rounded-full p-1.5 transition-all duration-200 ${
             searchOpen || search
               ? "bg-accent-subtle text-accent"
               : "text-ink-muted hover:bg-surface-warm hover:text-ink"
@@ -176,15 +204,6 @@ export function FilterPanel({
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </button>
-        {hasActiveFilters && (
-          <button
-            className="text-xs font-500 text-ink-faint hover:text-ink transition-colors px-1"
-            onClick={onClear}
-          >
-            Clear
-          </button>
-        )}
-        <div className="flex-1" />
         {toolbarButtons}
       </div>
 
@@ -227,9 +246,8 @@ export function FilterPanel({
       )}
 
       {open && (
-        <div className="mt-3 space-y-5 rounded-xl border border-border-light bg-surface-card p-5 shadow-sm">
+        <div className="mt-3 space-y-3 rounded-xl border border-border-light bg-surface-card px-5 py-4 shadow-sm max-h-[60vh] overflow-y-auto">
           <div>
-            <SectionHeading>Saved</SectionHeading>
             <button className={`${chipClass(favoritesOnly)} inline-flex items-center gap-1`} onClick={onToggleFavorites}>
               <svg className="h-3 w-3" viewBox="0 0 24 24" fill={favoritesOnly ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.562.562 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
@@ -245,6 +263,14 @@ export function FilterPanel({
           )}
           {locations.length > 0 && (
             <FilterSection title="Locations" items={locations} active={activeLocations} onToggle={onToggleLocation} />
+          )}
+          {hasActiveFilters && (
+            <button
+              className="text-xs font-500 text-ink-faint hover:text-ink transition-colors pt-1"
+              onClick={onClear}
+            >
+              Clear all filters
+            </button>
           )}
         </div>
       )}

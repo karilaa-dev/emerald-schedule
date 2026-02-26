@@ -141,28 +141,28 @@ export function App() {
   }
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="h-screen flex flex-col bg-surface overflow-hidden">
       {/* Header */}
-      <header className="sticky top-0 z-30 border-b border-border bg-surface-card/90 backdrop-blur-md">
+      <header className="shrink-0 z-30 border-b border-border bg-surface-card/90 backdrop-blur-md">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <div className="flex items-center justify-between gap-4 py-3">
+          <div className="flex items-center justify-between gap-4 py-2">
             <div className="flex items-baseline gap-1.5 shrink-0">
               {filters.myScheduleView ? (
                 <>
-                  <h1 className="font-display text-xl font-800 tracking-tight text-ink">My</h1>
-                  <span className="font-display text-xl font-800 tracking-tight text-accent">Schedule</span>
+                  <h1 className="font-display text-lg font-800 tracking-tight text-ink">My</h1>
+                  <span className="font-display text-lg font-800 tracking-tight text-accent">Schedule</span>
                 </>
               ) : (
                 <>
-                  <h1 className="font-display text-xl font-800 tracking-tight text-ink">ECCC</h1>
-                  <span className="font-display text-xl font-800 tracking-tight text-accent">'26</span>
-                  <span className="font-display text-xl font-800 tracking-tight text-ink">Schedule</span>
+                  <h1 className="font-display text-lg font-800 tracking-tight text-ink">ECCC</h1>
+                  <span className="font-display text-lg font-800 tracking-tight text-accent">'26</span>
+                  <span className="font-display text-lg font-800 tracking-tight text-ink">Schedule</span>
                 </>
               )}
             </div>
             <div className="flex items-center gap-1">
               <button
-                className="relative p-2 rounded-full text-ink-muted hover:text-ink hover:bg-surface-warm transition-colors duration-150"
+                className="relative p-1.5 rounded-full text-ink-muted hover:text-ink hover:bg-surface-warm transition-colors duration-150"
                 onClick={() => setShowInfo(true)}
                 aria-label="About this app"
                 title="About this app"
@@ -174,7 +174,7 @@ export function App() {
               <ThemeToggle theme={theme} onToggle={toggleTheme} />
             </div>
           </div>
-          <div className="pb-2 flex items-center gap-3 overflow-x-auto scrollbar-none">
+          <div className="pb-1.5 flex items-center gap-3 overflow-x-auto scrollbar-none">
             <DayTabs days={effectiveDays} activeDay={filters.day} onSelectDay={setDay} />
           </div>
         </div>
@@ -183,9 +183,9 @@ export function App() {
       <InstallTip visible={showInstallTip} onInstall={install} onDismiss={dismissInstallTip} />
       <OfflineBanner visible={!isOnline || isStale} />
 
-      {/* Main */}
-      <main className="mx-auto max-w-5xl px-4 sm:px-6 py-5">
-        <div className="mb-5">
+      {/* Toolbar */}
+      <div className="shrink-0 z-20 border-b border-border bg-surface-card/90 backdrop-blur-md">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 py-1">
           <FilterPanel
             categories={categories}
             tags={tags}
@@ -205,7 +205,7 @@ export function App() {
             toolbarButtons={
               <div className="flex items-center gap-1">
                 <button
-                  className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-600 transition-all duration-200 ${
+                  className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-600 transition-all duration-200 ${
                     compact
                       ? "bg-accent-subtle text-accent"
                       : "text-ink-muted hover:bg-surface-warm hover:text-ink"
@@ -226,7 +226,7 @@ export function App() {
                   {compact ? "Compact" : "Default"}
                 </button>
                 <button
-                  className={`grid place-items-center rounded-full p-2 transition-all duration-200 ${
+                  className={`grid place-items-center rounded-full p-1.5 transition-all duration-200 ${
                     forceNow || filters.day === currentTime.day
                       ? "bg-accent-subtle text-accent"
                       : "text-ink-muted hover:bg-surface-warm hover:text-ink"
@@ -247,54 +247,59 @@ export function App() {
             onToggleFavorites={toggleFavoritesOnly}
           />
         </div>
+      </div>
 
-        {loading && (
-          <div className="space-y-6 py-6">
-            {["a", "b", "c", "d", "e"].map((row) => (
-              <div key={row} className="flex gap-5">
-                <div className="w-16 shrink-0 pt-1">
-                  <div className="skeleton h-4 w-14 ml-auto" />
+      {/* Main — sole scroll container */}
+      <main className="flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 py-4">
+          {loading && (
+            <div className="space-y-6 py-6">
+              {["a", "b", "c", "d", "e"].map((row) => (
+                <div key={row} className="flex gap-5">
+                  <div className="w-16 shrink-0 pt-1">
+                    <div className="skeleton h-4 w-14 ml-auto" />
+                  </div>
+                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {["x", "y"].map((col) => (
+                      <div key={col} className="rounded-xl border border-border-light bg-surface-card p-4 space-y-3">
+                        <div className="skeleton h-4 w-4/5" />
+                        <div className="skeleton h-3 w-3/5" />
+                        <div className="skeleton h-3 w-2/5" />
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {["x", "y"].map((col) => (
-                    <div key={col} className="rounded-xl border border-border-light bg-surface-card p-4 space-y-3">
-                      <div className="skeleton h-4 w-4/5" />
-                      <div className="skeleton h-3 w-3/5" />
-                      <div className="skeleton h-3 w-2/5" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
 
-        {!loading && filtered.length === 0 && (
-          <EmptyState hasFilters={hasActiveFilters} isMySchedule={filters.myScheduleView} onClear={clearFilters} />
-        )}
+          {!loading && filtered.length === 0 && (
+            <EmptyState hasFilters={hasActiveFilters} isMySchedule={filters.myScheduleView} onClear={clearFilters} />
+          )}
 
-        {!loading && filtered.length > 0 && (
-          <p className="mb-0 font-display text-xs font-600 text-ink-faint uppercase tracking-widest">
-            {filtered.length} event{filtered.length !== 1 ? "s" : ""}
-            {filters.search && filters.day && (
-              <span className="normal-case tracking-normal">
-                {" "}on {formatDayShort(filters.day)} {formatDayDate(filters.day)}
-              </span>
-            )}
-          </p>
-        )}
+          {!loading && filtered.length > 0 && (
+            <p className="mb-0 font-display text-xs font-600 text-ink-faint uppercase tracking-widest">
+              {filtered.length} event{filtered.length !== 1 ? "s" : ""}
+              {filters.search && filters.day && (
+                <span className="normal-case tracking-normal">
+                  {" "}on {formatDayShort(filters.day)} {formatDayDate(filters.day)}
+                </span>
+              )}
+            </p>
+          )}
 
-        <Timeline
-          events={filtered}
-          scheduled={scheduled}
-          compact={compact}
-          currentHour={activeCurrentHour}
-          onToggleSchedule={toggleSchedule}
-          onSelectEvent={handleSelectEvent}
-        />
+          <Timeline
+            events={filtered}
+            scheduled={scheduled}
+            compact={compact}
+            currentHour={activeCurrentHour}
+            onToggleSchedule={toggleSchedule}
+            onSelectEvent={handleSelectEvent}
+          />
+
+          <ScheduleFooter lastChecked={lastChecked} serverUpdatedAt={serverUpdatedAt} deviceUpdatedAt={deviceUpdatedAt} onCheck={checkNow} onForceUpdate={forceUpdate} />
+        </div>
       </main>
-
-      <ScheduleFooter lastChecked={lastChecked} serverUpdatedAt={serverUpdatedAt} deviceUpdatedAt={deviceUpdatedAt} onCheck={checkNow} onForceUpdate={forceUpdate} />
 
       <FavoritesBar
         count={scheduled.size}

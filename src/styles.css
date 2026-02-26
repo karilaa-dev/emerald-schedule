@@ -23,9 +23,6 @@
   box-sizing: border-box;
 }
 
-html {
-  overflow-y: scroll;
-}
 
 body {
   font-family: var(--font-body);
