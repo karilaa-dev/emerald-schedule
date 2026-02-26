@@ -4,7 +4,7 @@ const STORAGE_KEY = "eccc-compact";
 
 export function useCompactMode() {
   const [compact, setCompact] = useState(
-    () => localStorage.getItem(STORAGE_KEY) === "true",
+    () => localStorage.getItem(STORAGE_KEY) !== "false",
   );
 
   const toggle = useCallback(() => {

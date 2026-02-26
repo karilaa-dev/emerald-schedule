@@ -21,8 +21,7 @@ export function DayTabs({ days, activeDay, onSelectDay }: Props) {
           className={tabClass(activeDay === day)}
           onClick={() => onSelectDay(day)}
         >
-          <span className="sm:hidden">{formatDayShort(day)}</span>
-          <span className="hidden sm:inline">{formatDayShort(day)} {formatDayDate(day)}</span>
+          {formatDayShort(day)} {formatDayDate(day)}
         </button>
       ))}
     </div>

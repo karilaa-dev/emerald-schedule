@@ -139,7 +139,7 @@ export function FilterPanel({
 
   return (
     <div>
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-1">
         <button
           className={`grid place-items-center rounded-full p-1.5 transition-all duration-200 ${
             favoritesOnly
@@ -151,7 +151,7 @@ export function FilterPanel({
           aria-label={favoritesOnly ? "Show all events" : "Show saved only"}
           title={favoritesOnly ? "Show all events" : "Show saved only"}
         >
-          <svg className="h-4 w-4" viewBox="0 0 24 24" fill={favoritesOnly ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill={favoritesOnly ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.562.562 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
           </svg>
         </button>
@@ -163,7 +163,7 @@ export function FilterPanel({
           }`}
           onClick={() => setOpen(!open)}
         >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
           </svg>
           Filters
@@ -174,7 +174,7 @@ export function FilterPanel({
           )}
         </button>
         <button
-          className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-600 transition-all duration-200 ${
+          className={`grid place-items-center rounded-full p-1.5 transition-all duration-200 ${
             myScheduleView
               ? "bg-accent-subtle text-accent"
               : "text-ink-muted hover:bg-surface-warm hover:text-ink"
@@ -183,12 +183,12 @@ export function FilterPanel({
           aria-label={myScheduleView ? "Exit My Schedule" : "My Schedule"}
           title={myScheduleView ? "Exit My Schedule" : "My Schedule"}
         >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <rect x="3" y="4" width="18" height="18" rx="2" strokeLinecap="round" strokeLinejoin="round" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M16 2v4M8 2v4M3 10h18" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" />
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" fill={myScheduleView ? "currentColor" : "none"} />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" stroke={myScheduleView ? "var(--color-accent-subtle)" : "currentColor"} />
           </svg>
-          My Schedule
         </button>
         <button
           className={`grid place-items-center rounded-full p-1.5 transition-all duration-200 ${
@@ -200,7 +200,7 @@ export function FilterPanel({
           aria-label="Search events"
           title="Search events"
         >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </button>

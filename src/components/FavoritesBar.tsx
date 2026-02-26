@@ -5,8 +5,6 @@ interface Props {
 }
 
 export function FavoritesBar({ count, favoritesOnly, onToggle }: Props) {
-  if (count === 0 && !favoritesOnly) return null;
-
   return (
     <button
       className={`fixed bottom-5 right-5 z-40 flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-600 shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 ${
@@ -22,7 +20,7 @@ export function FavoritesBar({ count, favoritesOnly, onToggle }: Props) {
         <line x1="8" y1="2" x2="8" y2="6" />
         <line x1="3" y1="10" x2="21" y2="10" stroke={favoritesOnly ? "rgba(255,255,255,0.5)" : "currentColor"} />
       </svg>
-      {favoritesOnly ? "My Schedule" : `My Schedule (${count})`}
+      {favoritesOnly ? "My Schedule" : count > 0 ? `My Schedule (${count})` : "My Schedule"}
     </button>
   );
 }

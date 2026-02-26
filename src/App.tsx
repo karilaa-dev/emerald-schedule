@@ -205,25 +205,27 @@ export function App() {
             toolbarButtons={
               <div className="flex items-center gap-1">
                 <button
-                  className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-600 transition-all duration-200 ${
+                  className={`grid place-items-center rounded-full p-1.5 transition-all duration-200 ${
                     compact
                       ? "bg-accent-subtle text-accent"
                       : "text-ink-muted hover:bg-surface-warm hover:text-ink"
                   }`}
                   onClick={toggleCompact}
-                  aria-label={compact ? "Expand cards" : "Compact cards"}
-                  title={compact ? "Expand cards" : "Compact cards"}
+                  aria-label={compact ? "Compact view" : "Expand cards"}
+                  title={compact ? "Compact view" : "Expand cards"}
                 >
                   {compact ? (
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    /* Expanded (active): two card rectangles */
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="3" width="18" height="7" rx="1.5" />
+                      <rect x="3" y="14" width="18" height="7" rx="1.5" />
                     </svg>
                   ) : (
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    /* Compact (inactive): two rows, each with title + short subtitle */
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 5h18M3 9h10M3 15h18M3 19h10" />
                     </svg>
                   )}
-                  {compact ? "Compact" : "Default"}
                 </button>
                 <button
                   className={`grid place-items-center rounded-full p-1.5 transition-all duration-200 ${
@@ -235,7 +237,7 @@ export function App() {
                   aria-label={forceNow ? "Disable now indicator" : "Show now indicator"}
                   title={forceNow ? "Disable now indicator" : "Show now indicator"}
                 >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <circle cx="12" cy="12" r="10" strokeLinecap="round" strokeLinejoin="round" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
                   </svg>
@@ -291,7 +293,7 @@ export function App() {
           <Timeline
             events={filtered}
             scheduled={scheduled}
-            compact={compact}
+            compact={!compact}
             currentHour={activeCurrentHour}
             onToggleSchedule={toggleSchedule}
             onSelectEvent={handleSelectEvent}
