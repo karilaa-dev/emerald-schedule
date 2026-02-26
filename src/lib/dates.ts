@@ -6,12 +6,19 @@ const MONTH_NAMES = [
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
 
+/** Parse "YYYY-MM-DD" into a local Date (midnight) */
+function parseDayKey(dayKey: string): Date {
+  const [y, m, d] = dayKey.split("-").map(Number);
+  return new Date(y!, m! - 1, d!);
+}
+
 /** Parse "YYYY-MM-DD HH:MM:SS" as a local Date (times are Pacific, displayed as-is) */
 function parseTime(timeStr: string): Date {
   const [datePart, timePart] = timeStr.split(" ");
-  const [y, m, d] = datePart!.split("-").map(Number);
   const [h, min, s] = (timePart ?? "00:00:00").split(":").map(Number);
-  return new Date(y!, m! - 1, d!, h, min, s);
+  const date = parseDayKey(datePart!);
+  date.setHours(h!, min, s);
+  return date;
 }
 
 /** "2026-03-05 10:00:00" → "10:00 AM" */
@@ -34,24 +41,21 @@ export function getDayKey(timeStr: string): string {
   return timeStr.split(" ")[0]!;
 }
 
-/** "2026-03-05" → "Thu, Mar 5" */
+/** "2026-03-05" -> "Thu, Mar 5" */
 export function formatDayLabel(dayKey: string): string {
-  const [y, m, d] = dayKey.split("-").map(Number);
-  const date = new Date(y!, m! - 1, d!);
+  const date = parseDayKey(dayKey);
   return `${DAY_NAMES[date.getDay()]}, ${MONTH_NAMES[date.getMonth()]} ${date.getDate()}`;
 }
 
-/** "2026-03-05" → "Thu" */
+/** "2026-03-05" -> "Thu" */
 export function formatDayShort(dayKey: string): string {
-  const [y, m, d] = dayKey.split("-").map(Number);
-  const date = new Date(y!, m! - 1, d!);
-  return DAY_NAMES[date.getDay()]!;
+  return DAY_NAMES[parseDayKey(dayKey).getDay()]!;
 }
 
-/** "2026-03-05" → "3/5" */
+/** "2026-03-05" -> "3/5" */
 export function formatDayDate(dayKey: string): string {
-  const [, m, d] = dayKey.split("-").map(Number);
-  return `${m}/${d}`;
+  const date = parseDayKey(dayKey);
+  return `${date.getMonth() + 1}/${date.getDate()}`;
 }
 
 /** Get the hour key for grouping: "2026-03-05 10:00:00" → "10" */

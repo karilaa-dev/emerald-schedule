@@ -27,18 +27,18 @@ export function TimeSlot({ hour, events, scheduled, compact, isCurrent, onToggle
     ? `${baseDivider} bg-accent-subtle`
     : `${baseDivider} bg-surface/95 border-border-light`;
 
-  const labelClass = isCurrent
-    ? "font-display text-xs font-700 text-accent tracking-wide"
-    : "font-display text-xs font-700 text-ink-faint tracking-wide";
+  const labelColor = isCurrent ? "text-accent" : "text-ink-faint";
 
-  const dividerStyle: React.CSSProperties = isCurrent
-    ? { zIndex: 5, scrollMarginTop: "0", borderBottomColor: "var(--color-accent)", borderBottomWidth: 2 }
-    : { zIndex: 5, scrollMarginTop: "0" };
+  const dividerStyle: React.CSSProperties = {
+    zIndex: 5,
+    scrollMarginTop: "0",
+    ...(isCurrent && { borderBottomColor: "var(--color-accent)", borderBottomWidth: 2 }),
+  };
 
   return (
     <div className={compact ? "pb-2" : "pb-4"}>
       <div ref={dividerRef} className={dividerClass} style={dividerStyle}>
-        <span className={labelClass}>
+        <span className={`font-display text-xs font-700 tracking-wide ${labelColor}`}>
           {formatHourLabel(hour)}
           {isCurrent && (
             <span className="ml-1.5 text-[0.625rem] font-600 uppercase tracking-widest text-accent/70">

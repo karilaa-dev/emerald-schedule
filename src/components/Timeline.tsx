@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import type { ScheduleEvent } from "../types.ts";
 import { groupByHour } from "../lib/dates.ts";
 import { TimeSlot } from "./TimeSlot.tsx";
@@ -11,27 +12,19 @@ interface Props {
   onSelectEvent: (event: ScheduleEvent) => void;
 }
 
-function HourList({
-  hours,
-  scheduled,
-  compact,
-  currentHour,
-  onToggleSchedule,
-  onSelectEvent,
-}: {
-  hours: Map<number, ScheduleEvent[]>;
-  scheduled: Set<number>;
-  compact?: boolean;
-  currentHour?: number | null;
-  onToggleSchedule: (id: number) => void;
-  onSelectEvent: (event: ScheduleEvent) => void;
-}) {
-  // Clamp currentHour to the available range: before first → first, after last → last
+export function Timeline({ events, scheduled, compact, currentHour, onToggleSchedule, onSelectEvent }: Props) {
+  const hours = useMemo(() => groupByHour(events), [events]);
+
+  if (events.length === 0) return null;
+
+  // Clamp currentHour to the available range: before first -> first, after last -> last
   let clampedHour = currentHour;
   if (clampedHour != null) {
     const keys = [...hours.keys()];
-    if (clampedHour < keys[0]!) clampedHour = keys[0]!;
-    else if (clampedHour > keys[keys.length - 1]!) clampedHour = keys[keys.length - 1]!;
+    const first = keys[0]!;
+    const last = keys[keys.length - 1]!;
+    if (clampedHour < first) clampedHour = first;
+    else if (clampedHour > last) clampedHour = last;
   }
 
   return (
@@ -49,20 +42,5 @@ function HourList({
         />
       ))}
     </div>
-  );
-}
-
-export function Timeline({ events, scheduled, compact, currentHour, onToggleSchedule, onSelectEvent }: Props) {
-  if (events.length === 0) return null;
-
-  return (
-    <HourList
-      hours={groupByHour(events)}
-      scheduled={scheduled}
-      compact={compact}
-      currentHour={currentHour}
-      onToggleSchedule={onToggleSchedule}
-      onSelectEvent={onSelectEvent}
-    />
   );
 }

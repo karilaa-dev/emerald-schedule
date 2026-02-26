@@ -2,26 +2,23 @@ import { useState, useEffect, useRef } from "react";
 
 const LONG_PRESS_MS = 500;
 
-function timeAgo(timestamp: number): { text: string; isRecent: boolean } {
+function formatElapsed(timestamp: number, suffix: string): string {
   const secs = Math.floor((Date.now() - timestamp) / 1000);
-  if (secs < 60) return { text: `${secs}s ago`, isRecent: true };
+  if (secs < 60) return `${secs}s${suffix}`;
   const mins = Math.floor(secs / 60);
-  if (mins < 60) return { text: mins === 1 ? "1 min ago" : `${mins} min ago`, isRecent: false };
+  if (mins < 60) return `${mins} min${suffix}`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return { text: hrs === 1 ? "1 hr ago" : `${hrs} hrs ago`, isRecent: false };
+  if (hrs < 24) return `${hrs} hr${hrs !== 1 ? "s" : ""}${suffix}`;
   const days = Math.floor(hrs / 24);
-  return { text: days === 1 ? "1 day ago" : `${days} days ago`, isRecent: false };
+  return `${days} day${days !== 1 ? "s" : ""}${suffix}`;
+}
+
+function timeAgo(timestamp: number): string {
+  return formatElapsed(timestamp, " ago");
 }
 
 function durationSince(timestamp: number): string {
-  const secs = Math.floor((Date.now() - timestamp) / 1000);
-  if (secs < 60) return `${secs}s`;
-  const mins = Math.floor(secs / 60);
-  if (mins < 60) return mins === 1 ? "1 min" : `${mins} min`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return hrs === 1 ? "1 hr" : `${hrs} hrs`;
-  const days = Math.floor(hrs / 24);
-  return days === 1 ? "1 day" : `${days} days`;
+  return formatElapsed(timestamp, "");
 }
 
 export function ScheduleFooter({
@@ -38,8 +35,8 @@ export function ScheduleFooter({
   onForceUpdate: () => void;
 }) {
   const [, tick] = useState(0);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
-  const intervalRef = useRef<ReturnType<typeof setInterval>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const intervalRef = useRef<ReturnType<typeof setInterval>>(undefined);
   const didLongPress = useRef(false);
 
   // Adaptive tick: 1s when any timestamp is < 60s old, 60s otherwise
@@ -93,8 +90,8 @@ export function ScheduleFooter({
       onTouchStart={startPress}
       onTouchEnd={endPress}
     >
-      {checked && <p>Checked {checked.text}</p>}
-      {updated && <p>Updated {updated.text}</p>}
+      {checked && <p>Checked {checked}</p>}
+      {updated && <p>Updated {updated}</p>}
       {serverUpdatedAt && <p>No schedule changes for {durationSince(serverUpdatedAt)}</p>}
     </footer>
   );

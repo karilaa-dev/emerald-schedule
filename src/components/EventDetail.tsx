@@ -1,8 +1,8 @@
-import { useEffect, useRef } from "react";
 import type { ScheduleEvent } from "../types.ts";
 import { formatTimeRange, formatDayLabel, getDayKey } from "../lib/dates.ts";
 import { getCategoryColor } from "../lib/colors.ts";
 import { decodeEntities, linkifyHtml } from "../lib/html.ts";
+import { useModal } from "../hooks/useModal.ts";
 
 interface Props {
   event: ScheduleEvent;
@@ -15,18 +15,7 @@ interface Props {
 
 export default function EventDetail({ event, isFavorite, isScheduled, onToggleFavorite, onToggleSchedule, onClose }: Props) {
   const location = event.venue_location?.name ?? event.location;
-
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handleKey);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", handleKey);
-      document.body.style.overflow = "";
-    };
-  }, [onClose]);
+  useModal(onClose);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
@@ -209,9 +198,5 @@ export default function EventDetail({ event, isFavorite, isScheduled, onToggleFa
 }
 
 function HtmlContent({ html, className }: { html: string; className?: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (ref.current) ref.current.innerHTML = html;
-  }, [html]);
-  return <div ref={ref} className={className} />;
+  return <div className={className} dangerouslySetInnerHTML={{ __html: html }} />;
 }

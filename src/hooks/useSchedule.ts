@@ -12,6 +12,26 @@ function isNetworkError(err: unknown): boolean {
   return err instanceof OfflineError || err instanceof TypeError;
 }
 
+interface CachedSchedule {
+  events: ScheduleEvent[];
+  hash: string;
+  serverUpdatedAt: number | null;
+  deviceUpdatedAt: number | null;
+}
+
+function loadFromCache(): CachedSchedule | null {
+  const cached = localStorage.getItem(CACHE_KEY);
+  if (!cached) return null;
+  const storedCachedAt = localStorage.getItem(CACHED_AT_KEY);
+  const storedDeviceUpdated = localStorage.getItem(DEVICE_UPDATED_KEY);
+  return {
+    events: JSON.parse(cached),
+    hash: localStorage.getItem(HASH_KEY) ?? "",
+    serverUpdatedAt: storedCachedAt ? Number(storedCachedAt) : null,
+    deviceUpdatedAt: storedDeviceUpdated ? Number(storedDeviceUpdated) : null,
+  };
+}
+
 export function useSchedule() {
   const [events, setEvents] = useState<ScheduleEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -84,29 +104,24 @@ export function useSchedule() {
           if (status.changed && status.hash) {
             await updateSchedule(status.hash);
           } else {
-            setEvents(JSON.parse(cached));
-            hashRef.current = storedHash;
-            const storedCachedAt = localStorage.getItem(CACHED_AT_KEY);
-            if (storedCachedAt) setServerUpdatedAt(Number(storedCachedAt));
-            const storedDeviceUpdated = localStorage.getItem(DEVICE_UPDATED_KEY);
-            if (storedDeviceUpdated) setDeviceUpdatedAt(Number(storedDeviceUpdated));
+            const local = loadFromCache()!;
+            setEvents(local.events);
+            hashRef.current = local.hash;
+            if (local.serverUpdatedAt) setServerUpdatedAt(local.serverUpdatedAt);
+            if (local.deviceUpdatedAt) setDeviceUpdatedAt(local.deviceUpdatedAt);
           }
         }
       } catch (err: unknown) {
         if (cancelled) return;
-        try {
-          const cached = localStorage.getItem(CACHE_KEY);
-          if (cached) {
-            setEvents(JSON.parse(cached));
-            hashRef.current = localStorage.getItem(HASH_KEY);
-            const storedCachedAt = localStorage.getItem(CACHED_AT_KEY);
-            if (storedCachedAt) setServerUpdatedAt(Number(storedCachedAt));
-            const storedDeviceUpdated = localStorage.getItem(DEVICE_UPDATED_KEY);
-            if (storedDeviceUpdated) setDeviceUpdatedAt(Number(storedDeviceUpdated));
-            if (isNetworkError(err)) setIsStale(true);
-            return;
-          }
-        } catch {}
+        const local = loadFromCache();
+        if (local) {
+          setEvents(local.events);
+          hashRef.current = local.hash;
+          if (local.serverUpdatedAt) setServerUpdatedAt(local.serverUpdatedAt);
+          if (local.deviceUpdatedAt) setDeviceUpdatedAt(local.deviceUpdatedAt);
+          if (isNetworkError(err)) setIsStale(true);
+          return;
+        }
         setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
         if (!cancelled) setLoading(false);

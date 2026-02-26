@@ -110,31 +110,27 @@ Bun.serve({
     },
   },
   fetch(req) {
-    const url = new URL(req.url);
-    if (url.pathname.startsWith("/icons/")) {
-      return new Response(Bun.file(`public${url.pathname}`), {
-        headers: {
-          "Content-Type": "image/svg+xml",
-          "Cache-Control": "public, max-age=86400",
-        },
+    const STATIC_CACHE = "public, max-age=86400";
+    const { pathname } = new URL(req.url);
+
+    const staticFiles: Record<string, { file: string; type: string }> = {
+      "/public/manifest.json": { file: "public/manifest.json", type: "application/manifest+json" },
+      "/og-image.png": { file: "public/og-image.png", type: "image/png" },
+    };
+
+    if (pathname.startsWith("/icons/")) {
+      return new Response(Bun.file(`public${pathname}`), {
+        headers: { "Content-Type": "image/svg+xml", "Cache-Control": STATIC_CACHE },
       });
     }
-    if (url.pathname === "/public/manifest.json") {
-      return new Response(Bun.file("public/manifest.json"), {
-        headers: {
-          "Content-Type": "application/manifest+json",
-          "Cache-Control": "public, max-age=86400",
-        },
+
+    const entry = staticFiles[pathname];
+    if (entry) {
+      return new Response(Bun.file(entry.file), {
+        headers: { "Content-Type": entry.type, "Cache-Control": STATIC_CACHE },
       });
     }
-    if (url.pathname === "/og-image.png") {
-      return new Response(Bun.file("public/og-image.png"), {
-        headers: {
-          "Content-Type": "image/png",
-          "Cache-Control": "public, max-age=86400",
-        },
-      });
-    }
+
     return new Response("Not Found", { status: 404 });
   },
 });

@@ -1,21 +1,11 @@
-import { useEffect } from "react";
+import { useModal } from "../hooks/useModal.ts";
 
 interface Props {
   onClose: () => void;
 }
 
 export function InfoModal({ onClose }: Props) {
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handleKey);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", handleKey);
-      document.body.style.overflow = "";
-    };
-  }, [onClose]);
+  useModal(onClose);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
