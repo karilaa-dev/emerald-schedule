@@ -58,23 +58,13 @@ export function App() {
   const tags = useMemo(() => getUniqueTags(events), [events]);
   const locations = useMemo(() => getUniqueLocations(events), [events]);
 
-  // Auto-select first day only on first visit (no stored preference)
+  // Auto-select first day on first visit or if stored day no longer exists
   useEffect(() => {
     if (days.length === 0) return;
 
     const stored = localStorage.getItem("eccc-selected-day");
 
-    // First visit: no stored preference → pick the first day
-    if (stored === null) {
-      setDay(days[0]!);
-      return;
-    }
-
-    // User explicitly chose "All days" → respect it
-    if (stored === "all") return;
-
-    // Stored day no longer in schedule → reset to first day
-    if (!days.includes(stored)) {
+    if (stored === null || !days.includes(stored)) {
       setDay(days[0]!);
     }
   }, [days, setDay]);
@@ -84,7 +74,7 @@ export function App() {
     [events, filters, favorites, scheduled],
   );
 
-  const activeCurrentHour = filters.day !== null && (forceNow || filters.day === currentTime.day)
+  const activeCurrentHour = forceNow || filters.day === currentTime.day
     ? currentTime.hour
     : null;
 
@@ -105,8 +95,8 @@ export function App() {
   // Auto-correct selected day when entering My Schedule if current day has no scheduled events
   useEffect(() => {
     if (!filters.myScheduleView || !scheduledDays) return;
-    if (filters.day !== null && !scheduledDays.includes(filters.day)) {
-      setDay(scheduledDays.length > 0 ? scheduledDays[0]! : null);
+    if (filters.day !== null && !scheduledDays.includes(filters.day) && scheduledDays.length > 0) {
+      setDay(scheduledDays[0]!);
     }
   }, [filters.myScheduleView, scheduledDays, filters.day, setDay]);
 
@@ -233,23 +223,21 @@ export function App() {
                   )}
                   {compact ? "Compact" : "Default"}
                 </button>
-                {filters.day !== null && (
-                  <button
-                    className={`grid place-items-center rounded-full p-2 transition-all duration-200 ${
-                      forceNow || filters.day === currentTime.day
-                        ? "bg-accent-subtle text-accent"
-                        : "text-ink-muted hover:bg-surface-warm hover:text-ink"
-                    }`}
-                    onClick={() => setForceNow((f) => !f)}
-                    aria-label={forceNow ? "Disable now indicator" : "Show now indicator"}
-                    title={forceNow ? "Disable now indicator" : "Show now indicator"}
-                  >
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <circle cx="12" cy="12" r="10" strokeLinecap="round" strokeLinejoin="round" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
-                    </svg>
-                  </button>
-                )}
+                <button
+                  className={`grid place-items-center rounded-full p-2 transition-all duration-200 ${
+                    forceNow || filters.day === currentTime.day
+                      ? "bg-accent-subtle text-accent"
+                      : "text-ink-muted hover:bg-surface-warm hover:text-ink"
+                  }`}
+                  onClick={() => setForceNow((f) => !f)}
+                  aria-label={forceNow ? "Disable now indicator" : "Show now indicator"}
+                  title={forceNow ? "Disable now indicator" : "Show now indicator"}
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <circle cx="12" cy="12" r="10" strokeLinecap="round" strokeLinejoin="round" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
+                  </svg>
+                </button>
               </div>
             }
             favoritesCount={favorites.size}
@@ -265,8 +253,8 @@ export function App() {
                 <div className="w-16 shrink-0 pt-1">
                   <div className="skeleton h-4 w-14 ml-auto" />
                 </div>
-                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {["x", "y", "z"].map((col) => (
+                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {["x", "y"].map((col) => (
                     <div key={col} className="rounded-xl border border-border-light bg-surface-card p-4 space-y-3">
                       <div className="skeleton h-4 w-4/5" />
                       <div className="skeleton h-3 w-3/5" />
@@ -297,7 +285,6 @@ export function App() {
         <Timeline
           events={filtered}
           scheduled={scheduled}
-          allDays={filters.day === null}
           compact={compact}
           currentHour={activeCurrentHour}
           onToggleSchedule={toggleSchedule}

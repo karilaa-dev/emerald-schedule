@@ -3,7 +3,7 @@ import { formatDayShort, formatDayDate } from "../lib/dates.ts";
 interface Props {
   days: string[];
   activeDay: string | null;
-  onSelectDay: (day: string | null) => void;
+  onSelectDay: (day: string) => void;
 }
 
 function tabClass(isActive: boolean): string {
@@ -15,12 +15,6 @@ function tabClass(isActive: boolean): string {
 export function DayTabs({ days, activeDay, onSelectDay }: Props) {
   return (
     <div className="flex gap-1">
-      <button
-        className={tabClass(activeDay === null)}
-        onClick={() => onSelectDay(null)}
-      >
-        All days
-      </button>
       {days.map((day) => (
         <button
           key={day}

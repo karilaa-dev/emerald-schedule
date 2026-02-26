@@ -73,22 +73,6 @@ export function getUniqueDays(events: ScheduleEvent[]): string[] {
   return [...days].sort();
 }
 
-/** Group events by day, then by hour within each day */
-export function groupByDayAndHour(
-  events: ScheduleEvent[],
-): { day: string; hours: Map<number, ScheduleEvent[]> }[] {
-  const dayMap = new Map<string, ScheduleEvent[]>();
-  for (const event of events) {
-    const day = getDayKey(event.start_time);
-    const group = dayMap.get(day) ?? [];
-    group.push(event);
-    dayMap.set(day, group);
-  }
-  return [...dayMap.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([day, dayEvents]) => ({ day, hours: groupByHour(dayEvents) }));
-}
-
 /** Group events by hour, sorted */
 export function groupByHour(events: ScheduleEvent[]): Map<number, ScheduleEvent[]> {
   const groups = new Map<number, ScheduleEvent[]>();

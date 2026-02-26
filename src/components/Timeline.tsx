@@ -1,11 +1,10 @@
 import type { ScheduleEvent } from "../types.ts";
-import { groupByHour, groupByDayAndHour } from "../lib/dates.ts";
+import { groupByHour } from "../lib/dates.ts";
 import { TimeSlot } from "./TimeSlot.tsx";
 
 interface Props {
   events: ScheduleEvent[];
   scheduled: Set<number>;
-  allDays?: boolean;
   compact?: boolean;
   currentHour?: number | null;
   onToggleSchedule: (id: number) => void;
@@ -53,35 +52,17 @@ function HourList({
   );
 }
 
-export function Timeline({ events, scheduled, allDays, compact, currentHour, onToggleSchedule, onSelectEvent }: Props) {
+export function Timeline({ events, scheduled, compact, currentHour, onToggleSchedule, onSelectEvent }: Props) {
   if (events.length === 0) return null;
 
-  if (!allDays) {
-    return (
-      <HourList
-        hours={groupByHour(events)}
-        scheduled={scheduled}
-        compact={compact}
-        currentHour={currentHour}
-        onToggleSchedule={onToggleSchedule}
-        onSelectEvent={onSelectEvent}
-      />
-    );
-  }
-
   return (
-    <div>
-      {groupByDayAndHour(events).map(({ day, hours }) => (
-        <section key={day}>
-          <HourList
-            hours={hours}
-            scheduled={scheduled}
-            compact={compact}
-            onToggleSchedule={onToggleSchedule}
-            onSelectEvent={onSelectEvent}
-          />
-        </section>
-      ))}
-    </div>
+    <HourList
+      hours={groupByHour(events)}
+      scheduled={scheduled}
+      compact={compact}
+      currentHour={currentHour}
+      onToggleSchedule={onToggleSchedule}
+      onSelectEvent={onSelectEvent}
+    />
   );
 }

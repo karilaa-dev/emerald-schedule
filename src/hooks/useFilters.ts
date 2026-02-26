@@ -6,8 +6,7 @@ const FAVORITES_FILTER_KEY = "eccc-favorites-only";
 const MY_SCHEDULE_VIEW_KEY = "eccc-my-schedule-view";
 
 function getStoredDay(): string | null {
-  const v = localStorage.getItem(DAY_KEY);
-  return v === "all" ? null : v;
+  return localStorage.getItem(DAY_KEY);
 }
 
 const initialState: FilterState = {
@@ -25,8 +24,8 @@ type SetField = "categories" | "tags" | "locations";
 export function useFilters() {
   const [filters, setFilters] = useState<FilterState>(initialState);
 
-  const setDay = useCallback((day: string | null) => {
-    localStorage.setItem(DAY_KEY, day ?? "all");
+  const setDay = useCallback((day: string) => {
+    localStorage.setItem(DAY_KEY, day);
     setFilters((prev) => ({ ...prev, day }));
   }, []);
 
