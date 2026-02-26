@@ -200,6 +200,8 @@ export function App() {
             hasActiveFilters={hasActiveFilters}
             search={filters.search}
             onSearchChange={setSearch}
+            myScheduleView={filters.myScheduleView}
+            onToggleMyScheduleView={toggleMyScheduleView}
             toolbarButtons={
               <div className="flex items-center gap-1">
                 <button
@@ -272,7 +274,7 @@ export function App() {
         )}
 
         {!loading && filtered.length > 0 && (
-          <p className="mb-3 font-display text-xs font-600 text-ink-faint uppercase tracking-widest">
+          <p className="mb-0 font-display text-xs font-600 text-ink-faint uppercase tracking-widest">
             {filtered.length} event{filtered.length !== 1 ? "s" : ""}
             {filters.search && filters.day && (
               <span className="normal-case tracking-normal">

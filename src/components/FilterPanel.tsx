@@ -18,6 +18,8 @@ interface Props {
   favoritesCount: number;
   favoritesOnly: boolean;
   onToggleFavorites: () => void;
+  myScheduleView: boolean;
+  onToggleMyScheduleView: () => void;
 }
 
 const CHIP_BASE = "rounded-full px-2.5 py-1 text-xs font-500 transition-all duration-150";
@@ -95,6 +97,8 @@ export function FilterPanel({
   favoritesCount,
   favoritesOnly,
   onToggleFavorites,
+  myScheduleView,
+  onToggleMyScheduleView,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -108,6 +112,21 @@ export function FilterPanel({
   return (
     <div>
       <div className="flex items-center gap-1.5">
+        <button
+          className={`grid place-items-center rounded-full p-2 transition-all duration-200 ${
+            favoritesOnly
+              ? "text-favorite"
+              : "text-ink-muted hover:bg-surface-warm hover:text-ink"
+          }`}
+          style={favoritesOnly ? { backgroundColor: "var(--color-favorite-subtle)" } : undefined}
+          onClick={onToggleFavorites}
+          aria-label={favoritesOnly ? "Show all events" : "Show saved only"}
+          title={favoritesOnly ? "Show all events" : "Show saved only"}
+        >
+          <svg className="h-4 w-4" viewBox="0 0 24 24" fill={favoritesOnly ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.562.562 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+          </svg>
+        </button>
         <button
           className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-600 transition-all duration-200 ${
             open || hasActiveFilters
@@ -127,19 +146,21 @@ export function FilterPanel({
           )}
         </button>
         <button
-          className={`grid place-items-center rounded-full p-2 transition-all duration-200 ${
-            favoritesOnly
-              ? "text-favorite"
+          className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-600 transition-all duration-200 ${
+            myScheduleView
+              ? "bg-accent-subtle text-accent"
               : "text-ink-muted hover:bg-surface-warm hover:text-ink"
           }`}
-          style={favoritesOnly ? { backgroundColor: "var(--color-favorite-subtle)" } : undefined}
-          onClick={onToggleFavorites}
-          aria-label={favoritesOnly ? "Show all events" : "Show saved only"}
-          title={favoritesOnly ? "Show all events" : "Show saved only"}
+          onClick={onToggleMyScheduleView}
+          aria-label={myScheduleView ? "Exit My Schedule" : "My Schedule"}
+          title={myScheduleView ? "Exit My Schedule" : "My Schedule"}
         >
-          <svg className="h-4 w-4" viewBox="0 0 24 24" fill={favoritesOnly ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.562.562 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <rect x="3" y="4" width="18" height="18" rx="2" strokeLinecap="round" strokeLinejoin="round" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16 2v4M8 2v4M3 10h18" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" />
           </svg>
+          My Schedule
         </button>
         <button
           className={`grid place-items-center rounded-full p-2 transition-all duration-200 ${

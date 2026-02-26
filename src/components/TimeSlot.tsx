@@ -1,6 +1,6 @@
 import { useRef, useEffect } from "react";
 import type { ScheduleEvent } from "../types.ts";
-import { formatHourLabel, getDayKey, formatDayShort } from "../lib/dates.ts";
+import { formatHourLabel } from "../lib/dates.ts";
 import { EventCard } from "./EventCard.tsx";
 
 interface Props {
@@ -36,10 +36,10 @@ export function TimeSlot({ hour, events, scheduled, compact, isCurrent, onToggle
     : { zIndex: 5, scrollMarginTop: "5.5rem" };
 
   return (
-    <div className={compact ? "py-2" : "py-4"}>
+    <div className={compact ? "pb-2" : "pb-4"}>
       <div ref={dividerRef} className={dividerClass} style={dividerStyle}>
         <span className={labelClass}>
-          {formatDayShort(getDayKey(events[0]!.start_time))} · {formatHourLabel(hour)}
+          {formatHourLabel(hour)}
           {isCurrent && (
             <span className="ml-1.5 text-[0.625rem] font-600 uppercase tracking-widest text-accent/70">
               Now
