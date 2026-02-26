@@ -255,18 +255,23 @@ export function App() {
       <main className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 py-4">
           {loading && (
-            <div className="space-y-6 py-6">
-              {["a", "b", "c", "d", "e"].map((row) => (
-                <div key={row} className="flex gap-5">
-                  <div className="w-16 shrink-0 pt-1">
-                    <div className="skeleton h-4 w-14 ml-auto" />
+            <div className="py-4">
+              {["a", "b", "c", "d"].map((slot) => (
+                <div key={slot} className="pb-4">
+                  <div className="-mx-4 px-4 sm:-mx-6 sm:px-6 py-1.5 border-b border-border-light bg-surface/95">
+                    <div className="skeleton h-3 w-16" />
                   </div>
-                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {["x", "y"].map((col) => (
-                      <div key={col} className="rounded-xl border border-border-light bg-surface-card p-4 space-y-3">
-                        <div className="skeleton h-4 w-4/5" />
-                        <div className="skeleton h-3 w-3/5" />
-                        <div className="skeleton h-3 w-2/5" />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                    {["x", "y"].map((card) => (
+                      <div key={card} className="flex overflow-hidden rounded-xl border border-border-light bg-surface-card">
+                        <div className="flex-1 min-w-0 p-3.5 space-y-2">
+                          <div className="skeleton h-4 w-4/5" />
+                          <div className="skeleton h-3 w-3/5" />
+                          <div className="skeleton h-3 w-2/5" />
+                        </div>
+                        <div className="flex w-[60px] shrink-0 items-center justify-center border-l border-border-light">
+                          <div className="skeleton h-7 w-7 !rounded-md" />
+                        </div>
                       </div>
                     ))}
                   </div>
