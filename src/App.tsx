@@ -149,25 +149,25 @@ export function App() {
             <div className="flex items-baseline gap-1.5 shrink-0">
               {filters.myScheduleView ? (
                 <>
-                  <h1 className="font-display text-lg font-800 tracking-tight text-ink">My</h1>
-                  <span className="font-display text-lg font-800 tracking-tight text-accent">Schedule</span>
+                  <h1 className="font-display text-xl font-800 tracking-tight text-ink">My</h1>
+                  <span className="font-display text-xl font-800 tracking-tight text-accent">Schedule</span>
                 </>
               ) : (
                 <>
-                  <h1 className="font-display text-lg font-800 tracking-tight text-ink">ECCC</h1>
-                  <span className="font-display text-lg font-800 tracking-tight text-accent">'26</span>
-                  <span className="font-display text-lg font-800 tracking-tight text-ink">Schedule</span>
+                  <h1 className="font-display text-xl font-800 tracking-tight text-ink">ECCC</h1>
+                  <span className="font-display text-xl font-800 tracking-tight text-accent">'26</span>
+                  <span className="font-display text-xl font-800 tracking-tight text-ink">Schedule</span>
                 </>
               )}
             </div>
             <div className="flex items-center gap-1">
               <button
-                className="relative p-1.5 rounded-full text-ink-muted hover:text-ink hover:bg-surface-warm transition-colors duration-150"
+                className="relative p-2 rounded-full text-ink-muted hover:text-ink hover:bg-surface-warm transition-colors duration-150"
                 onClick={() => setShowInfo(true)}
                 aria-label="About this app"
                 title="About this app"
               >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </button>
@@ -205,7 +205,7 @@ export function App() {
             toolbarButtons={
               <div className="flex items-center gap-1">
                 <button
-                  className={`grid place-items-center rounded-full p-1.5 transition-all duration-200 ${
+                  className={`grid place-items-center rounded-full p-2 transition-all duration-200 ${
                     compact
                       ? "bg-accent-subtle text-accent"
                       : "text-ink-muted hover:bg-surface-warm hover:text-ink"
@@ -216,19 +216,19 @@ export function App() {
                 >
                   {compact ? (
                     /* Expanded (active): two card rectangles */
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                       <rect x="3" y="3" width="18" height="7" rx="1.5" />
                       <rect x="3" y="14" width="18" height="7" rx="1.5" />
                     </svg>
                   ) : (
                     /* Compact (inactive): two rows, each with title + short subtitle */
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                       <path d="M3 5h18M3 9h10M3 15h18M3 19h10" />
                     </svg>
                   )}
                 </button>
                 <button
-                  className={`grid place-items-center rounded-full p-1.5 transition-all duration-200 ${
+                  className={`grid place-items-center rounded-full p-2 transition-all duration-200 ${
                     forceNow || filters.day === currentTime.day
                       ? "bg-accent-subtle text-accent"
                       : "text-ink-muted hover:bg-surface-warm hover:text-ink"
@@ -237,7 +237,7 @@ export function App() {
                   aria-label={forceNow ? "Disable now indicator" : "Show now indicator"}
                   title={forceNow ? "Disable now indicator" : "Show now indicator"}
                 >
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <circle cx="12" cy="12" r="10" strokeLinecap="round" strokeLinejoin="round" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
                   </svg>
@@ -253,7 +253,7 @@ export function App() {
 
       {/* Main — sole scroll container */}
       <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 py-4">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 py-5">
           {loading && (
             <div className="py-4">
               {["a", "b", "c", "d"].map((slot) => (
@@ -285,7 +285,7 @@ export function App() {
           )}
 
           {!loading && filtered.length > 0 && (
-            <p className="mb-0 font-display text-xs font-600 text-ink-faint uppercase tracking-widest">
+            <p className="mb-0 font-display text-sm font-600 text-ink-faint uppercase tracking-widest">
               {filtered.length} event{filtered.length !== 1 ? "s" : ""}
               {filters.search && filters.day && (
                 <span className="normal-case tracking-normal">

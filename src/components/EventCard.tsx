@@ -22,12 +22,12 @@ export function EventCard({ event, isScheduled, compact, onToggleSchedule, onSel
       onClick={() => onSelect(event)}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect(event); } }}
     >
-      <div className="flex-1 min-w-0 p-3.5">
-        <h3 className="font-display text-sm font-700 leading-snug text-ink">
+      <div className="flex-1 min-w-0 p-4">
+        <h3 className="font-display text-base font-700 leading-snug text-ink">
           {decodeEntities(event.title)}
         </h3>
 
-        <div className="mt-0.5 flex flex-col text-[13px] text-ink-muted">
+        <div className="mt-0.5 flex flex-col text-sm text-ink-muted">
           <span className="font-500">{formatTimeRange(event.start_time, event.end_time)}</span>
           {location && (
             <span className="truncate text-ink-faint">{location}</span>
@@ -35,19 +35,19 @@ export function EventCard({ event, isScheduled, compact, onToggleSchedule, onSel
         </div>
 
         {!compact && event.people_list && (
-          <p className="mt-0.5 text-[11px] text-ink-faint truncate italic">
+          <p className="mt-0.5 text-xs text-ink-faint truncate italic">
             {event.people_list}
           </p>
         )}
 
         {!compact && event.schedule_categories.length > 0 && (
-          <div className="mt-1 flex flex-wrap gap-1">
+          <div className="mt-1.5 flex flex-wrap gap-1">
             {event.schedule_categories.map((cat) => {
               const color = getCategoryColor(cat.name);
               return (
                 <span
                   key={cat.id}
-                  className="inline-block rounded-full px-2 py-0.5 text-[10px] font-600 tracking-wide"
+                  className="inline-block rounded-full px-2 py-0.5 text-[11px] font-600 tracking-wide"
                   style={{ backgroundColor: color.bg, color: color.text }}
                 >
                   {cat.name}
