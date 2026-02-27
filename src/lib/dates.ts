@@ -73,6 +73,11 @@ export function formatTimeLabel(timeKey: number): string {
   return `${hour}:${m.toString().padStart(2, "0")} ${ampm}`;
 }
 
+/** Get the day-of-week index (0 = Sun … 6 = Sat) for a "YYYY-MM-DD" key */
+export function getDayOfWeek(dayKey: string): number {
+  return parseDayKey(dayKey).getDay();
+}
+
 /** Get sorted unique days from events */
 export function getUniqueDays(events: ScheduleEvent[]): string[] {
   const days = new Set(events.map((e) => getDayKey(e.start_time)));

@@ -1,10 +1,10 @@
-import { useState, useMemo, useEffect, useCallback, lazy, Suspense } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef, lazy, Suspense } from "react";
 import type { ScheduleEvent } from "./types.ts";
 import { useSchedule } from "./hooks/useSchedule.ts";
 import { useFavorites } from "./hooks/useFavorites.ts";
 import { useMySchedule } from "./hooks/useMySchedule.ts";
 import { useFilters } from "./hooks/useFilters.ts";
-import { getUniqueDays, getDayKey, formatDayShort, formatDayDate } from "./lib/dates.ts";
+import { getUniqueDays, getDayKey, getDayOfWeek, formatDayShort, formatDayDate } from "./lib/dates.ts";
 import {
   filterEvents,
   getUniqueCategories,
@@ -16,6 +16,7 @@ import { useInstallPrompt } from "./hooks/useInstallPrompt.ts";
 import { useTheme } from "./hooks/useTheme.ts";
 import { useCompactMode } from "./hooks/useCompactMode.ts";
 import { useCurrentHour } from "./hooks/useCurrentHour.ts";
+import { useNowIndicator } from "./hooks/useNowIndicator.ts";
 import { DayTabs } from "./components/DayTabs.tsx";
 import { ThemeToggle } from "./components/ThemeToggle.tsx";
 import { FilterPanel } from "./components/FilterPanel.tsx";
@@ -49,9 +50,10 @@ export function App() {
     hasActiveFilters,
   } = useFilters();
   const currentTime = useCurrentHour();
-  const [forceNow, setForceNow] = useState(false);
+  const { enabled: nowEnabled, toggle: toggleNow } = useNowIndicator();
   const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);
   const [showInfo, setShowInfo] = useState(false);
+  const mainRef = useRef<HTMLElement>(null);
 
   const days = useMemo(() => getUniqueDays(events), [events]);
   const categories = useMemo(() => getUniqueCategories(events), [events]);
@@ -74,9 +76,16 @@ export function App() {
     [events, filters, favorites, scheduled],
   );
 
-  const activeCurrentHour = forceNow || filters.day === currentTime.day
+  const activeCurrentHour = nowEnabled && filters.day && getDayOfWeek(filters.day) === new Date().getDay()
     ? currentTime.hour
     : null;
+
+  // Scroll to top on day change (TimeSlot handles scroll-to-now when activeCurrentHour is set)
+  useEffect(() => {
+    if (mainRef.current && activeCurrentHour == null) {
+      mainRef.current.scrollTop = 0;
+    }
+  }, [filters.day]);
 
   // Days that have at least one scheduled event (for My Schedule view)
   const scheduledDays = useMemo(() => {
@@ -205,6 +214,22 @@ export function App() {
             toolbarButtons={
               <div className="flex items-center gap-1">
                 <button
+                  className={`flex items-center gap-1 rounded-full px-2.5 py-1.5 transition-all duration-200 ${
+                    nowEnabled
+                      ? "bg-accent-subtle text-accent"
+                      : "text-ink-muted hover:bg-surface-warm hover:text-ink"
+                  }`}
+                  onClick={toggleNow}
+                  aria-label={nowEnabled ? "Disable now indicator" : "Show now indicator"}
+                  title={nowEnabled ? "Disable now indicator" : "Show now indicator"}
+                >
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <circle cx="12" cy="12" r="10" strokeLinecap="round" strokeLinejoin="round" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
+                  </svg>
+                  <span className="text-xs font-600">Now</span>
+                </button>
+                <button
                   className={`grid place-items-center rounded-full p-2 transition-all duration-200 ${
                     compact
                       ? "bg-accent-subtle text-accent"
@@ -227,21 +252,6 @@ export function App() {
                     </svg>
                   )}
                 </button>
-                <button
-                  className={`grid place-items-center rounded-full p-2 transition-all duration-200 ${
-                    forceNow || filters.day === currentTime.day
-                      ? "bg-accent-subtle text-accent"
-                      : "text-ink-muted hover:bg-surface-warm hover:text-ink"
-                  }`}
-                  onClick={() => setForceNow((f) => !f)}
-                  aria-label={forceNow ? "Disable now indicator" : "Show now indicator"}
-                  title={forceNow ? "Disable now indicator" : "Show now indicator"}
-                >
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <circle cx="12" cy="12" r="10" strokeLinecap="round" strokeLinejoin="round" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
-                  </svg>
-                </button>
               </div>
             }
             favoritesCount={favorites.size}
@@ -252,7 +262,7 @@ export function App() {
       </div>
 
       {/* Main — sole scroll container */}
-      <main className="flex-1 overflow-y-auto">
+      <main ref={mainRef} className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 py-5">
           {loading && (
             <div className="py-4">
