@@ -24,8 +24,9 @@ function loadFromCache(): CachedSchedule | null {
   if (!cached) return null;
   const storedCachedAt = localStorage.getItem(CACHED_AT_KEY);
   const storedDeviceUpdated = localStorage.getItem(DEVICE_UPDATED_KEY);
+  const events: ScheduleEvent[] = JSON.parse(cached);
   return {
-    events: JSON.parse(cached),
+    events: events.filter(e => e.start_time),
     hash: localStorage.getItem(HASH_KEY) ?? "",
     serverUpdatedAt: storedCachedAt ? Number(storedCachedAt) : null,
     deviceUpdatedAt: storedDeviceUpdated ? Number(storedDeviceUpdated) : null,
@@ -44,7 +45,7 @@ export function useSchedule() {
 
   const updateSchedule = useCallback(async (hash?: string) => {
     const data = await fetchSchedules(hash);
-    setEvents(data.schedules);
+    setEvents(data.schedules.filter(e => e.start_time));
     setIsStale(false);
     const now = Date.now();
     setServerUpdatedAt(data.cachedAt);

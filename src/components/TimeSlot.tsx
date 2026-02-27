@@ -41,7 +41,7 @@ export const TimeSlot = memo(function TimeSlot({ time, events, scheduled, compac
   };
 
   return (
-    <div className={compact ? "pb-2" : "pb-4"} style={{ contentVisibility: "auto", containIntrinsicSize: "auto 300px" }}>
+    <div className={compact ? "pb-2" : "pb-4"}>
       <div ref={dividerRef} className={dividerClass} style={dividerStyle}>
         <span className={`font-display text-sm font-700 tracking-wide ${labelColor}`}>
           {formatTimeLabel(time)}
@@ -52,7 +52,7 @@ export const TimeSlot = memo(function TimeSlot({ time, events, scheduled, compac
           )}
         </span>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4" style={{ marginTop: "1rem" }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" style={{ marginTop: "1rem" }}>
         {events.map((event) => (
           <EventCard
             key={event.id}

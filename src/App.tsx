@@ -271,8 +271,8 @@ export function App() {
                   <div className="-mx-4 px-4 sm:-mx-6 sm:px-6 py-1.5 border-b border-border-light bg-surface/95">
                     <div className="skeleton h-3 w-16" />
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-                    {["x", "y"].map((card) => (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
+                    {["x", "y", "z"].map((card) => (
                       <div key={card} className="flex overflow-hidden rounded-xl border border-border-light bg-surface-card">
                         <div className="flex-1 min-w-0 p-3.5 space-y-2">
                           <div className="skeleton h-4 w-4/5" />
