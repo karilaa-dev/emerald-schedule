@@ -1,7 +1,7 @@
 import type { ScheduleEvent } from "../types.ts";
 import { formatTimeRange, formatDayLabel, getDayKey } from "../lib/dates.ts";
 import { getCategoryColor } from "../lib/colors.ts";
-import { decodeEntities, linkifyHtml } from "../lib/html.ts";
+import { decodeEntities, linkifyHtml, sanitizeHtml } from "../lib/html.ts";
 import { useModal } from "../hooks/useModal.ts";
 
 interface Props {
@@ -198,5 +198,5 @@ export default function EventDetail({ event, isFavorite, isScheduled, onToggleFa
 }
 
 function HtmlContent({ html, className }: { html: string; className?: string }) {
-  return <div className={className} dangerouslySetInnerHTML={{ __html: html }} />;
+  return <div className={className} dangerouslySetInnerHTML={{ __html: sanitizeHtml(html) }} />;
 }
