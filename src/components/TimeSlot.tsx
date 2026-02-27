@@ -1,10 +1,10 @@
 import { useRef, useEffect } from "react";
 import type { ScheduleEvent } from "../types.ts";
-import { formatHourLabel } from "../lib/dates.ts";
+import { formatTimeLabel } from "../lib/dates.ts";
 import { EventCard } from "./EventCard.tsx";
 
 interface Props {
-  hour: number;
+  time: number;
   events: ScheduleEvent[];
   scheduled: Set<number>;
   compact?: boolean;
@@ -13,7 +13,7 @@ interface Props {
   onSelectEvent: (event: ScheduleEvent) => void;
 }
 
-export function TimeSlot({ hour, events, scheduled, compact, isCurrent, onToggleSchedule, onSelectEvent }: Props) {
+export function TimeSlot({ time, events, scheduled, compact, isCurrent, onToggleSchedule, onSelectEvent }: Props) {
   const dividerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export function TimeSlot({ hour, events, scheduled, compact, isCurrent, onToggle
     <div className={compact ? "pb-2" : "pb-4"}>
       <div ref={dividerRef} className={dividerClass} style={dividerStyle}>
         <span className={`font-display text-xs font-700 tracking-wide ${labelColor}`}>
-          {formatHourLabel(hour)}
+          {formatTimeLabel(time)}
           {isCurrent && (
             <span className="ml-1.5 text-[0.625rem] font-600 uppercase tracking-widest text-accent/70">
               Now

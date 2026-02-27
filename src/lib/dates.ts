@@ -58,17 +58,19 @@ export function formatDayDate(dayKey: string): string {
   return `${date.getMonth() + 1}/${date.getDate()}`;
 }
 
-/** Get the hour key for grouping: "2026-03-05 10:00:00" → "10" */
-function getHourKey(timeStr: string): number {
+/** Get the time key for grouping: "2026-03-05 10:15:00" → 615 (minutes from midnight) */
+function getTimeKey(timeStr: string): number {
   const date = parseTime(timeStr);
-  return date.getHours();
+  return date.getHours() * 60 + date.getMinutes();
 }
 
-/** Format hour for display: 10 → "10:00 AM" */
-export function formatHourLabel(hour: number): string {
-  const ampm = hour >= 12 ? "PM" : "AM";
-  const h = hour % 12 || 12;
-  return `${h}:00 ${ampm}`;
+/** Format time key for display: 615 → "10:15 AM" */
+export function formatTimeLabel(timeKey: number): string {
+  const h = Math.floor(timeKey / 60);
+  const m = timeKey % 60;
+  const ampm = h >= 12 ? "PM" : "AM";
+  const hour = h % 12 || 12;
+  return `${hour}:${m.toString().padStart(2, "0")} ${ampm}`;
 }
 
 /** Get sorted unique days from events */
@@ -77,18 +79,18 @@ export function getUniqueDays(events: ScheduleEvent[]): string[] {
   return [...days].sort();
 }
 
-/** Group events by hour, sorted */
-export function groupByHour(events: ScheduleEvent[]): Map<number, ScheduleEvent[]> {
+/** Group events by full start time (minute precision), sorted */
+export function groupByTime(events: ScheduleEvent[]): Map<number, ScheduleEvent[]> {
   const groups = new Map<number, ScheduleEvent[]>();
   for (const event of events) {
-    const hour = getHourKey(event.start_time);
-    const group = groups.get(hour) ?? [];
+    const key = getTimeKey(event.start_time);
+    const group = groups.get(key) ?? [];
     group.push(event);
-    groups.set(hour, group);
+    groups.set(key, group);
   }
-  // Sort events within each group by start time
+  // Sort events within each group alphabetically by title
   for (const group of groups.values()) {
-    group.sort((a, b) => a.start_time.localeCompare(b.start_time));
+    group.sort((a, b) => a.title.localeCompare(b.title));
   }
   return new Map([...groups.entries()].sort(([a], [b]) => a - b));
 }

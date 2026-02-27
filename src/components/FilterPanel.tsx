@@ -139,7 +139,7 @@ export function FilterPanel({
 
   return (
     <div>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center justify-center gap-1">
         <button
           className={`grid place-items-center rounded-full p-1.5 transition-all duration-200 ${
             favoritesOnly

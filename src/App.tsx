@@ -174,7 +174,7 @@ export function App() {
               <ThemeToggle theme={theme} onToggle={toggleTheme} />
             </div>
           </div>
-          <div className="pb-1.5 flex items-center gap-3 overflow-x-auto scrollbar-none">
+          <div className="pb-1.5 flex items-center justify-center gap-3 overflow-x-auto scrollbar-none">
             <DayTabs days={effectiveDays} activeDay={filters.day} onSelectDay={setDay} />
           </div>
         </div>
