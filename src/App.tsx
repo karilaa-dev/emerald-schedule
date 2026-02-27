@@ -22,7 +22,7 @@ import { ThemeToggle } from "./components/ThemeToggle.tsx";
 import { FilterPanel } from "./components/FilterPanel.tsx";
 import { Timeline } from "./components/Timeline.tsx";
 const EventDetail = lazy(() => import("./components/EventDetail.tsx"));
-import { InfoModal } from "./components/InfoModal.tsx";
+const InfoModal = lazy(() => import("./components/InfoModal.tsx"));
 import { FavoritesBar } from "./components/FavoritesBar.tsx";
 import { EmptyState } from "./components/EmptyState.tsx";
 import { OfflineBanner } from "./components/OfflineBanner.tsx";
@@ -152,7 +152,7 @@ export function App() {
   return (
     <div className="h-screen flex flex-col bg-surface overflow-hidden">
       {/* Header */}
-      <header className="shrink-0 z-30 border-b border-border bg-surface-card/90 backdrop-blur-md">
+      <header className="shrink-0 z-30 border-b border-border bg-surface-card">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="flex items-center justify-between gap-4 py-2">
             <div className="flex items-baseline gap-1.5 shrink-0">
@@ -193,7 +193,7 @@ export function App() {
       <OfflineBanner visible={!isOnline || isStale} />
 
       {/* Toolbar */}
-      <div className="shrink-0 z-20 border-b border-border bg-surface-card/90 backdrop-blur-md">
+      <div className="shrink-0 z-20 border-b border-border bg-surface-card">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 py-1">
           <FilterPanel
             categories={categories}
@@ -337,7 +337,11 @@ export function App() {
         </Suspense>
       )}
 
-      {showInfo && <InfoModal onClose={() => setShowInfo(false)} />}
+      {showInfo && (
+        <Suspense fallback={null}>
+          <InfoModal onClose={() => setShowInfo(false)} />
+        </Suspense>
+      )}
     </div>
   );
 }

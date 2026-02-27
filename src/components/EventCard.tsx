@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { ScheduleEvent } from "../types.ts";
 import { formatTimeRange } from "../lib/dates.ts";
 import { getCategoryColor } from "../lib/colors.ts";
@@ -11,14 +12,14 @@ interface Props {
   onSelect: (event: ScheduleEvent) => void;
 }
 
-export function EventCard({ event, isScheduled, compact, onToggleSchedule, onSelect }: Props) {
+export const EventCard = memo(function EventCard({ event, isScheduled, compact, onToggleSchedule, onSelect }: Props) {
   const location = event.venue_location?.name ?? event.location;
 
   return (
     <article
       role="button"
       tabIndex={0}
-      className="animate-card-in group flex overflow-hidden rounded-xl border border-border-light bg-surface-card cursor-pointer transition-all duration-200 hover:shadow-lg hover:shadow-accent/5 hover:-translate-y-0.5 hover:border-accent/20"
+      className="group flex overflow-hidden rounded-xl border border-border-light bg-surface-card cursor-pointer transition-[box-shadow,border-color,transform] duration-200 hover:shadow-lg hover:shadow-accent/5 hover:-translate-y-0.5 hover:border-accent/20"
       onClick={() => onSelect(event)}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect(event); } }}
     >
@@ -88,4 +89,4 @@ export function EventCard({ event, isScheduled, compact, onToggleSchedule, onSel
       </button>
     </article>
   );
-}
+});

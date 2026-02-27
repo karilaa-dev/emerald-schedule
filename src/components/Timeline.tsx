@@ -33,7 +33,7 @@ export function Timeline({ events, scheduled, compact, currentHour, onToggleSche
     : null;
 
   return (
-    <div className="divide-y divide-divider">
+    <div>
       {[...timeGroups.entries()].map(([time, timeEvents]) => (
         <TimeSlot
           key={time}

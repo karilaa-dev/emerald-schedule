@@ -4,7 +4,7 @@ interface Props {
   onClose: () => void;
 }
 
-export function InfoModal({ onClose }: Props) {
+export default function InfoModal({ onClose }: Props) {
   useModal(onClose);
 
   return (

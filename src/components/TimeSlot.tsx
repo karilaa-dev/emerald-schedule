@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, memo } from "react";
 import type { ScheduleEvent } from "../types.ts";
 import { formatTimeLabel } from "../lib/dates.ts";
 import { EventCard } from "./EventCard.tsx";
@@ -13,19 +13,24 @@ interface Props {
   onSelectEvent: (event: ScheduleEvent) => void;
 }
 
-export function TimeSlot({ time, events, scheduled, compact, isCurrent, onToggleSchedule, onSelectEvent }: Props) {
+export const TimeSlot = memo(function TimeSlot({ time, events, scheduled, compact, isCurrent, onToggleSchedule, onSelectEvent }: Props) {
   const dividerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isCurrent && dividerRef.current) {
-      dividerRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      const el = dividerRef.current;
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
     }
   }, [isCurrent]);
 
-  const baseDivider = "sticky top-0 -mx-4 px-4 sm:-mx-6 sm:px-6 py-2 backdrop-blur-sm border-b";
+  const baseDivider = "sticky top-0 -mx-4 px-4 sm:-mx-6 sm:px-6 py-2 border-b";
   const dividerClass = isCurrent
     ? `${baseDivider} bg-accent-subtle`
-    : `${baseDivider} bg-surface/95 border-border-light`;
+    : `${baseDivider} bg-surface border-border-light`;
 
   const labelColor = isCurrent ? "text-accent" : "text-ink-faint";
 
@@ -36,7 +41,7 @@ export function TimeSlot({ time, events, scheduled, compact, isCurrent, onToggle
   };
 
   return (
-    <div className={compact ? "pb-2" : "pb-4"}>
+    <div className={compact ? "pb-2" : "pb-4"} style={{ contentVisibility: "auto", containIntrinsicSize: "auto 300px" }}>
       <div ref={dividerRef} className={dividerClass} style={dividerStyle}>
         <span className={`font-display text-sm font-700 tracking-wide ${labelColor}`}>
           {formatTimeLabel(time)}
@@ -61,4 +66,4 @@ export function TimeSlot({ time, events, scheduled, compact, isCurrent, onToggle
       </div>
     </div>
   );
-}
+});
