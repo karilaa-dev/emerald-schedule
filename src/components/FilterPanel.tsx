@@ -4,7 +4,7 @@ interface Props {
   categories: string[];
   tags: string[];
   locations: string[];
-  activeCategories: Set<string>;
+  activeCategories: Map<string, "include" | "exclude">;
   activeTags: Set<string>;
   activeLocations: Set<string>;
   onToggleCategory: (cat: string) => void;
@@ -25,8 +25,17 @@ interface Props {
 const CHIP_BASE = "rounded-full px-3 py-1.5 text-sm font-500 transition-all duration-150";
 const CHIP_ACTIVE = `${CHIP_BASE} bg-accent-light text-accent font-600 shadow-sm`;
 const CHIP_INACTIVE = `${CHIP_BASE} bg-surface-warm text-ink-muted hover:bg-border-light hover:text-ink`;
+const CHIP_EXCLUDED = `${CHIP_BASE} bg-exclude-light text-exclude font-600 line-through shadow-sm`;
 
-function chipClass(isActive: boolean): string {
+type ChipState = "include" | "exclude" | "default";
+
+function chipClass(state: ChipState): string {
+  if (state === "include") return CHIP_ACTIVE;
+  if (state === "exclude") return CHIP_EXCLUDED;
+  return CHIP_INACTIVE;
+}
+
+function boolChipClass(isActive: boolean): string {
   return isActive ? CHIP_ACTIVE : CHIP_INACTIVE;
 }
 
@@ -88,7 +97,47 @@ function FilterSection({
         {shown.map((item) => (
           <button
             key={item}
-            className={chipClass(active.has(item))}
+            className={boolChipClass(active.has(item))}
+            onClick={() => onToggle(item)}
+          >
+            {item}
+          </button>
+        ))}
+        {hasMore && (
+          <button
+            className="text-xs font-500 text-accent hover:underline px-1"
+            onClick={() => setExpanded(!expanded)}
+          >
+            {expanded ? "Less" : `+${items.length - 6}`}
+          </button>
+        )}
+      </div>
+    </CollapsibleSection>
+  );
+}
+
+function CategoryFilterSection({
+  title,
+  items,
+  categoryStates,
+  onToggle,
+}: {
+  title: string;
+  items: string[];
+  categoryStates: Map<string, "include" | "exclude">;
+  onToggle: (item: string) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const shown = expanded ? items : items.slice(0, 6);
+  const hasMore = items.length > 6;
+
+  return (
+    <CollapsibleSection title={title} activeCount={categoryStates.size}>
+      <div className="flex flex-wrap gap-1.5">
+        {shown.map((item) => (
+          <button
+            key={item}
+            className={chipClass(categoryStates.get(item) ?? "default")}
             onClick={() => onToggle(item)}
           >
             {item}
@@ -248,7 +297,7 @@ export function FilterPanel({
       {open && (
         <div className="mt-3 space-y-3 rounded-xl border border-border-light bg-surface-card px-5 py-4 shadow-sm max-h-[60vh] overflow-y-auto">
           <div>
-            <button className={`${chipClass(favoritesOnly)} inline-flex items-center gap-1`} onClick={onToggleFavorites}>
+            <button className={`${boolChipClass(favoritesOnly)} inline-flex items-center gap-1`} onClick={onToggleFavorites}>
               <svg className="h-3 w-3" viewBox="0 0 24 24" fill={favoritesOnly ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.562.562 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
               </svg>
@@ -256,7 +305,7 @@ export function FilterPanel({
             </button>
           </div>
           {categories.length > 0 && (
-            <FilterSection title="Categories" items={categories} active={activeCategories} onToggle={onToggleCategory} />
+            <CategoryFilterSection title="Categories" items={categories} categoryStates={activeCategories} onToggle={onToggleCategory} />
           )}
           {tags.length > 0 && (
             <FilterSection title="Tags" items={tags} active={activeTags} onToggle={onToggleTag} />

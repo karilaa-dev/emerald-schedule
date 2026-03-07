@@ -17,6 +17,9 @@
   --color-favorite: #e68a00;
   --color-favorite-subtle: #fef3e0;
   --color-divider: #eae8e5;
+  --color-exclude: #b91c1c;
+  --color-exclude-light: #fee2e2;
+  --color-exclude-strike: rgba(185, 28, 28, 0.5);
 }
 
 * {

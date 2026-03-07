@@ -7,14 +7,24 @@ export function filterEvents(
   favorites: Set<number>,
   scheduled: Set<number>,
 ): ScheduleEvent[] {
+  const includedCats = new Set<string>();
+  const excludedCats = new Set<string>();
+  for (const [cat, mode] of filters.categories) {
+    if (mode === "include") includedCats.add(cat);
+    else excludedCats.add(cat);
+  }
+
   return events.filter((event) => {
     if (filters.myScheduleView && !scheduled.has(event.id)) return false;
 
     if (filters.day && getDayKey(event.start_time) !== filters.day) return false;
 
-    if (filters.categories.size > 0) {
-      const hasMatch = event.schedule_categories.some((c) => filters.categories.has(c.name));
-      if (!hasMatch) return false;
+    if (includedCats.size > 0) {
+      if (!event.schedule_categories.some((c) => includedCats.has(c.name))) return false;
+    }
+
+    if (excludedCats.size > 0) {
+      if (event.schedule_categories.some((c) => excludedCats.has(c.name))) return false;
     }
 
     if (filters.tags.size > 0) {

@@ -11,7 +11,7 @@ function getStoredDay(): string | null {
 
 const initialState: FilterState = {
   day: getStoredDay(),
-  categories: new Set(),
+  categories: new Map(),
   tags: new Set(),
   locations: new Set(),
   search: "",
@@ -38,7 +38,16 @@ export function useFilters() {
     });
   }, []);
 
-  const toggleCategory = useCallback((cat: string) => toggleSetItem("categories", cat), [toggleSetItem]);
+  const toggleCategory = useCallback((cat: string) => {
+    setFilters((prev) => {
+      const next = new Map(prev.categories);
+      const current = next.get(cat);
+      if (current === undefined) next.set(cat, "include");
+      else if (current === "include") next.set(cat, "exclude");
+      else next.delete(cat);
+      return { ...prev, categories: next };
+    });
+  }, []);
   const toggleTag = useCallback((tag: string) => toggleSetItem("tags", tag), [toggleSetItem]);
   const toggleLocation = useCallback((loc: string) => toggleSetItem("locations", loc), [toggleSetItem]);
 

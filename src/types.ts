@@ -69,7 +69,7 @@ export interface ScheduleApiResponseWithMeta extends ScheduleApiResponse {
 
 export interface FilterState {
   day: string | null;
-  categories: Set<string>;
+  categories: Map<string, "include" | "exclude">;
   tags: Set<string>;
   locations: Set<string>;
   search: string;
