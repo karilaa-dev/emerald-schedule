@@ -128,7 +128,12 @@ function CategoryFilterSection({
   onToggle: (item: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const shown = expanded ? items : items.slice(0, 6);
+  const sorted = [...items].sort((a, b) => {
+    const aActive = categoryStates.has(a) ? 0 : 1;
+    const bActive = categoryStates.has(b) ? 0 : 1;
+    return aActive - bActive;
+  });
+  const shown = expanded ? sorted : sorted.slice(0, 6);
   const hasMore = items.length > 6;
 
   return (

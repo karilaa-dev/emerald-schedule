@@ -11,7 +11,7 @@ function getStoredDay(): string | null {
 
 const initialState: FilterState = {
   day: getStoredDay(),
-  categories: new Map(),
+  categories: new Map([["Autographing", "exclude"], ["Photo Ops", "exclude"]]),
   tags: new Set(),
   locations: new Set(),
   search: "",
